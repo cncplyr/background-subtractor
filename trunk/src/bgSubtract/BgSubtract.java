@@ -26,11 +26,14 @@ public class BgSubtract {
 			System.out.println("Input image not found!");
 		}
 
-		if(currentImg.getWidth() != bgImg.getWidth()){
-			
-		}
+
 		
 		if (currentImg != null && bgImg != null) {
+			if(currentImg.getWidth() != bgImg.getWidth()){
+				// TODO: throw an exception
+			}
+			
+			
 			System.out.println("Editing file...");
 			saveImage(removeBackground(currentImg), "output1");
 			System.out.println("File saved!");
