@@ -7,24 +7,24 @@ import java.awt.image.ConvolveOp;
 import java.awt.image.Kernel;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.imageio.ImageIO;
 
 public class BgSubtract {
-	private static int noOfBgImgs = 0;
+	// TODO: Change these numbers later after testing finished.
+	private static int noOfBgImgs = 2;
+	private static int noOfFgImgs = 1;
 	private static BufferedImage bgImg = null;
 	private static BufferedImage currentImg = null;
 	private static int threshold = 10;
 	private static int blurRadius = 5;
 
-	public static void main(String[] args) {
-		// Test for blur
-		// try {
-		// saveImage(averageBlur2(ImageIO.read(new File("input1.jpg")), 5),
-		// "newBlurTest2");
-		// } catch (IOException e) {
-		// System.out.println("Image not found");
-		// }
+	public static void main(String[] args) throws Exception {
+		System.out.println("=======================================");
+		System.out.println("     Running Background Subtractor");
+		System.out.println("=======================================");
 
 		// Take arguments for number of background images
 		// TODO: Replace with iterator? or foreach loop?
@@ -35,19 +35,28 @@ public class BgSubtract {
 				}
 			}
 		}
+		System.out.println("Number of background images:\t" + noOfBgImgs);
+		System.out.println("Number of foreground images:\t" + noOfFgImgs);
+		System.out.println("Blur Radius:\t\t\t" + blurRadius);
+		System.out.println("Colour Threshold:\t\t" + threshold);
+		System.out.println("---------------------------------------");
 
+		// Background Image Creation
 		try {
-			BufferedImage bgImg1 = averageBlur(ImageIO.read(new File(
-					"background1.jpg")), blurRadius);
-			BufferedImage bgImg2 = averageBlur(ImageIO.read(new File(
-					"background2.jpg")), blurRadius);
-			BufferedImage[] zomg = { bgImg1, bgImg2 };
-			bgImg = combineImages(zomg);
+			List<BufferedImage> bgImgs = new ArrayList<BufferedImage>();
+			while (noOfBgImgs > 0) {
+				bgImgs.add(averageBlur(ImageIO.read(new File("background"
+						+ noOfBgImgs + ".jpg")), blurRadius));
+				noOfBgImgs--;
+			}
+			bgImg = combineImages(bgImgs);
 		} catch (IOException e) {
 			System.out.println("Background image not found.");
 		}
+
+		// Subtract Background
 		try {
-			currentImg = averageBlur(ImageIO.read(new File("input4.jpg")),
+			currentImg = averageBlur(ImageIO.read(new File("input1.jpg")),
 					blurRadius);
 		} catch (IOException e) {
 			System.out.println("Input image not found!");
@@ -55,12 +64,14 @@ public class BgSubtract {
 
 		if (currentImg != null && bgImg != null) {
 			if (currentImg.getWidth() != bgImg.getWidth()) {
-				System.out.println("something went wrong");
-				// TODO: throw an exception
+				throw new Exception("Images must be of identical dimensions!");
+
 			}
 			System.out.println("Editing file...");
 			saveImage(removeBackground(currentImg), "output1");
 			System.out.println("File saved!");
+			System.out.println("Exiting...");
+			System.out.println("=======================================");
 		}
 	}
 
@@ -71,17 +82,17 @@ public class BgSubtract {
 	 *            Array of images to combine.
 	 * @return A single image of average pixel values of the inputs.
 	 */
-	public static BufferedImage combineImages(BufferedImage[] img) {
-		int height0 = img[0].getHeight();
-		int width0 = img[0].getWidth();
+	public static BufferedImage combineImages(List<BufferedImage> img) {
+		int height0 = img.get(0).getHeight();
+		int width0 = img.get(0).getWidth();
 
 		BufferedImage newImage = new BufferedImage(width0, height0,
 				BufferedImage.TYPE_INT_RGB);
 
 		for (int x = 0; x < width0; x++) {
 			for (int y = 0; y < height0; y++) {
-				Color c0 = new Color(img[0].getRGB(x, y));
-				Color c1 = new Color(img[1].getRGB(x, y));
+				Color c0 = new Color(img.get(0).getRGB(x, y));
+				Color c1 = new Color(img.get(1).getRGB(x, y));
 
 				int red = (c0.getRed() + c1.getRed()) / 2;
 				int green = (c0.getGreen() + c1.getGreen()) / 2;
@@ -110,7 +121,7 @@ public class BgSubtract {
 	public static BufferedImage averageBlur(BufferedImage img, int radius) {
 		BufferedImage newImg = null;
 
-		float[] matrix = createMatrix(radius);
+		float[] matrix = createAverageMatrix(radius);
 
 		BufferedImageOp op = new ConvolveOp(new Kernel(radius, radius, matrix));
 		return op.filter(img, newImg);
@@ -123,7 +134,7 @@ public class BgSubtract {
 	 *            The size of one side of the matrix.
 	 * @return A matrix.
 	 */
-	public static float[] createMatrix(int size) {
+	public static float[] createAverageMatrix(int size) {
 		int cells = size * size;
 		float[] matrix = new float[cells];
 
