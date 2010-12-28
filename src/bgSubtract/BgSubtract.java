@@ -2,29 +2,53 @@ package bgSubtract;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
+import java.awt.image.BufferedImageOp;
+import java.awt.image.ConvolveOp;
+import java.awt.image.Kernel;
 import java.io.File;
 import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
 public class BgSubtract {
+	private static int noOfBgImgs = 0;
 	private static BufferedImage bgImg = null;
 	private static BufferedImage currentImg = null;
 	private static int threshold = 10;
+	private static int blurRadius = 5;
 
 	public static void main(String[] args) {
+		// Test for blur
+		// try {
+		// saveImage(averageBlur2(ImageIO.read(new File("input1.jpg")), 5),
+		// "newBlurTest2");
+		// } catch (IOException e) {
+		// System.out.println("Image not found");
+		// }
+
+		// Take arguments for number of background images
+		// TODO: Replace with iterator? or foreach loop?
+		if (args.length > 0) {
+			for (int i = 0; i < args.length; i++) {
+				if (args[i].equals("-b")) {
+					noOfBgImgs = Integer.parseInt(args[i + 1]);
+				}
+			}
+		}
+
 		try {
 			BufferedImage bgImg1 = averageBlur(ImageIO.read(new File(
-					"background1.jpg")));
+					"background1.jpg")), blurRadius);
 			BufferedImage bgImg2 = averageBlur(ImageIO.read(new File(
-					"background2.jpg")));
+					"background2.jpg")), blurRadius);
 			BufferedImage[] zomg = { bgImg1, bgImg2 };
 			bgImg = combineImages(zomg);
 		} catch (IOException e) {
 			System.out.println("Background image not found.");
 		}
 		try {
-			currentImg = averageBlur(ImageIO.read(new File("input1.jpg")));
+			currentImg = averageBlur(ImageIO.read(new File("input4.jpg")),
+					blurRadius);
 		} catch (IOException e) {
 			System.out.println("Input image not found!");
 		}
@@ -40,36 +64,13 @@ public class BgSubtract {
 		}
 	}
 
-	public static BufferedImage vflipImage(BufferedImage img) {
-		int height = img.getHeight();
-		int width = img.getWidth();
-
-		BufferedImage newImage = new BufferedImage(width, height,
-				BufferedImage.TYPE_INT_RGB);
-
-		for (int x = 0; x < width; x++) {
-			for (int y = 0; y < height; y++) {
-				newImage.setRGB(x, height - y - 1, img.getRGB(x, y));
-			}
-		}
-		return newImage;
-	}
-
-	public static BufferedImage hflipImage(BufferedImage img) {
-		int height = img.getHeight();
-		int width = img.getWidth();
-
-		BufferedImage newImage = new BufferedImage(width, height,
-				BufferedImage.TYPE_INT_RGB);
-
-		for (int x = 0; x < width; x++) {
-			for (int y = 0; y < height; y++) {
-				newImage.setRGB(width - x - 1, y, img.getRGB(x, y));
-			}
-		}
-		return newImage;
-	}
-
+	/**
+	 * Combines BufferedImages.
+	 * 
+	 * @param img
+	 *            Array of images to combine.
+	 * @return A single image of average pixel values of the inputs.
+	 */
 	public static BufferedImage combineImages(BufferedImage[] img) {
 		int height0 = img[0].getHeight();
 		int width0 = img[0].getWidth();
@@ -97,70 +98,40 @@ public class BgSubtract {
 		return newImage;
 	}
 
-	public static BufferedImage averageBlur(BufferedImage img) {
-		int height = img.getHeight();
-		int width = img.getWidth();
+	/**
+	 * Simple average blur
+	 * 
+	 * @param img
+	 *            The image to blur.
+	 * @param radius
+	 *            The radius of the blur to apply.
+	 * @return The Blurred Image.
+	 */
+	public static BufferedImage averageBlur(BufferedImage img, int radius) {
+		BufferedImage newImg = null;
 
-		BufferedImage newImage = new BufferedImage(width, height,
-				BufferedImage.TYPE_INT_RGB);
+		float[] matrix = createMatrix(radius);
 
-		Color[] colours = new Color[25];
-		int red, green, blue;
+		BufferedImageOp op = new ConvolveOp(new Kernel(radius, radius, matrix));
+		return op.filter(img, newImg);
+	}
 
-		for (int x = 2; x < width - 2; x++) {
-			for (int y = 2; y < height - 2; y++) {
-				// reset colours
-				red = 0;
-				green = 0;
-				blue = 0;
+	/**
+	 * Makes a square matrix, where the sum of the contents adds up to 1.
+	 * 
+	 * @param size
+	 *            The size of one side of the matrix.
+	 * @return A matrix.
+	 */
+	public static float[] createMatrix(int size) {
+		int cells = size * size;
+		float[] matrix = new float[cells];
 
-				// top row
-				colours[0] = new Color(img.getRGB(x - 2, y - 2));
-				colours[1] = new Color(img.getRGB(x - 1, y - 2));
-				colours[2] = new Color(img.getRGB(x, y - 2));
-				colours[3] = new Color(img.getRGB(x + 1, y - 2));
-				colours[4] = new Color(img.getRGB(x + 2, y - 2));
-				// 2nd row
-				colours[5] = new Color(img.getRGB(x - 2, y - 1));
-				colours[6] = new Color(img.getRGB(x - 1, y - 1));
-				colours[7] = new Color(img.getRGB(x, y - 1));
-				colours[8] = new Color(img.getRGB(x + 1, y - 1));
-				colours[9] = new Color(img.getRGB(x + 2, y - 1));
-				// middle row
-				colours[10] = new Color(img.getRGB(x - 2, y));
-				colours[11] = new Color(img.getRGB(x - 1, y));
-				colours[12] = new Color(img.getRGB(x, y));
-				colours[13] = new Color(img.getRGB(x + 1, y));
-				colours[14] = new Color(img.getRGB(x + 2, y));
-				// 4th row
-				colours[15] = new Color(img.getRGB(x - 2, y + 1));
-				colours[16] = new Color(img.getRGB(x - 1, y + 1));
-				colours[17] = new Color(img.getRGB(x, y + 1));
-				colours[18] = new Color(img.getRGB(x + 1, y + 1));
-				colours[19] = new Color(img.getRGB(x + 2, y + 1));
-				// 5th row
-				colours[20] = new Color(img.getRGB(x - 2, y + 2));
-				colours[21] = new Color(img.getRGB(x - 1, y + 2));
-				colours[22] = new Color(img.getRGB(x, y + 2));
-				colours[23] = new Color(img.getRGB(x + 1, y + 2));
-				colours[24] = new Color(img.getRGB(x + 2, y + 2));
-
-				// get average colour
-				for (Color cellColour : colours) {
-					red += cellColour.getRed();
-					green += cellColour.getGreen();
-					blue += cellColour.getBlue();
-				}
-				red = red / 25;
-				green = green / 25;
-				blue = blue / 25;
-				Color newColour = new Color(red, green, blue);
-
-				newImage.setRGB(x, y, newColour.getRGB());
-			}
+		for (int i = 0; i < cells; i++) {
+			matrix[i] = 1.0f / (float) cells;
 		}
 
-		return newImage;
+		return matrix;
 	}
 
 	public static BufferedImage removeBackground(BufferedImage img) {
@@ -189,10 +160,12 @@ public class BgSubtract {
 						.getRed() <= bgColour.getRed() + threshold)
 						&& (imgColour.getGreen() >= bgColour.getGreen()
 								- threshold && imgColour.getGreen() <= bgColour
-								.getGreen() + threshold)
+								.getGreen()
+								+ threshold)
 						&& (imgColour.getBlue() >= bgColour.getBlue()
 								- threshold && imgColour.getBlue() <= bgColour
-								.getBlue() + threshold)) {
+								.getBlue()
+								+ threshold)) {
 					// if colours match, remove it
 					int red = imgColour.getRed() - bgColour.getRed();
 					int green = imgColour.getGreen() - bgColour.getGreen();
