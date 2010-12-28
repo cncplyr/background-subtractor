@@ -10,6 +10,7 @@ import javax.imageio.ImageIO;
 public class BgSubtract {
 	private static BufferedImage bgImg = null;
 	private static BufferedImage currentImg = null;
+	private static int threshold = 10;
 
 	public static void main(String[] args) {
 		try {
@@ -107,14 +108,29 @@ public class BgSubtract {
 				Color bgColour = new Color(bgImg.getRGB(x, y));
 				Color imgColour = new Color(img.getRGB(x, y));
 
-				// newImage.setRGB(x, y, imgColour - bgColour);
+//				newImage.setRGB(x, y, imgColour - bgColour);
 
-				if ((imgColour.getRed() >= bgColour.getRed() - 1 && imgColour.getRed() <= bgColour.getRed() + 1)
-					&& (imgColour.getGreen() >= bgColour.getGreen() - 1 && imgColour.getGreen() <= bgColour.getGreen() + 1)
-					&& (imgColour.getBlue() >= bgColour.getBlue() - 1 && imgColour.getBlue() <= bgColour.getBlue() + 1)
+//				int red = imgColour.getRed() - bgColour.getRed();
+//				int green = imgColour.getGreen() - bgColour.getGreen();
+//				int blue = imgColour.getBlue() - bgColour.getBlue();
+//				
+//				Color argh = new Color(fixColoursInRange(red),fixColoursInRange(green),fixColoursInRange(blue));
+//				
+//				newImage.setRGB(x, y, argh.getRGB());
+				
+				if ((imgColour.getRed() >= bgColour.getRed() - threshold && imgColour.getRed() <= bgColour.getRed() + threshold)
+					&& (imgColour.getGreen() >= bgColour.getGreen() - threshold && imgColour.getGreen() <= bgColour.getGreen() + threshold)
+					&& (imgColour.getBlue() >= bgColour.getBlue() - threshold && imgColour.getBlue() <= bgColour.getBlue() + threshold)
 						) {
 					// if colours match, remove it
-					newImage.setRGB(x, y, 0);
+					int red = imgColour.getRed() - bgColour.getRed();
+					int green = imgColour.getGreen() - bgColour.getGreen();
+					int blue = imgColour.getBlue() - bgColour.getBlue();
+					
+					Color argh = new Color(fixColoursInRange(red),fixColoursInRange(green),fixColoursInRange(blue));
+					
+					newImage.setRGB(x, y, argh.getRGB());
+//					newImage.setRGB(x, y, 0);
 				} else {
 					// else copy it over
 					newImage.setRGB(x, y, imgColour.getRGB());
@@ -132,5 +148,16 @@ public class BgSubtract {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	
+	public static int fixColoursInRange(int colour){
+		if(colour<0){
+			colour = 0;
+		}
+		if(colour>255){
+			colour = 255;
+		}
+		return colour;
 	}
 }
