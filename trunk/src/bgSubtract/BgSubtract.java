@@ -12,6 +12,11 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 
+/**
+ * 
+ * @author cncplyr
+ * 
+ */
 public class BgSubtract {
 	// TODO: Change these numbers later after testing finished.
 	private static int noOfBgImgs = 2;
@@ -19,7 +24,8 @@ public class BgSubtract {
 	private static BufferedImage bgImg = null;
 	private static BufferedImage currentImg = null;
 	private static int threshold = 10;
-	private static int blurRadius = 5;
+	private static int blurRadius = 10;
+	private static String fileFormat = ".png";
 
 	public static void main(String[] args) throws Exception {
 		System.out.println("=======================================");
@@ -30,8 +36,16 @@ public class BgSubtract {
 		// TODO: Replace with iterator? or foreach loop?
 		if (args.length > 0) {
 			for (int i = 0; i < args.length; i++) {
+				// number of background images
 				if (args[i].equals("-b")) {
 					noOfBgImgs = Integer.parseInt(args[i + 1]);
+					// format
+				} else if (args[i].equals("-f")) {
+					if (args[i + 1].equals("png")) {
+						fileFormat = ".png";
+					} else {
+						fileFormat = ".jpg";
+					}
 				}
 			}
 		}
@@ -41,33 +55,29 @@ public class BgSubtract {
 		System.out.println("Colour Threshold:\t\t" + threshold);
 		System.out.println("---------------------------------------");
 
-		// Background Image Creation
-		try {
-			List<BufferedImage> bgImgs = new ArrayList<BufferedImage>();
-			while (noOfBgImgs > 0) {
-				bgImgs.add(averageBlur(ImageIO.read(new File("background"
-						+ noOfBgImgs + ".jpg")), blurRadius));
-				noOfBgImgs--;
-			}
-			bgImg = combineImages(bgImgs);
-		} catch (IOException e) {
-			System.out.println("Background image not found.");
+		/* Background Image Creation */
+		List<BufferedImage> bgImgs = new ArrayList<BufferedImage>();
+		while (noOfBgImgs > 0) {
+			// Get each image, blur it, add it to the list
+			BufferedImage currentImg = loadImage("background" + noOfBgImgs,
+					fileFormat);
+			bgImgs.add(averageBlur(currentImg, blurRadius));
+			noOfBgImgs--;
 		}
+		// Combine the background images
+		bgImg = combineImages(bgImgs);
 
-		// Subtract Background
-		try {
-			currentImg = averageBlur(ImageIO.read(new File("input1.jpg")),
-					blurRadius);
-		} catch (IOException e) {
-			System.out.println("Input image not found!");
-		}
+		/* Subtract Background */
+		// Load and blur foreground image
+		currentImg = loadImage("image00038", fileFormat);
+		currentImg = averageBlur(currentImg, blurRadius);
 
+		// Subtract that shizzle!!
 		if (currentImg != null && bgImg != null) {
 			if (currentImg.getWidth() != bgImg.getWidth()) {
 				throw new Exception("Images must be of identical dimensions!");
-
 			}
-			System.out.println("Editing file...");
+			System.out.println("Editing and saving file...");
 			saveImage(removeBackground(currentImg), "output1");
 			System.out.println("File saved!");
 			System.out.println("Exiting...");
@@ -119,12 +129,11 @@ public class BgSubtract {
 	 * @return The Blurred Image.
 	 */
 	public static BufferedImage averageBlur(BufferedImage img, int radius) {
-		BufferedImage newImg = null;
-
 		float[] matrix = createAverageMatrix(radius);
 
-		BufferedImageOp op = new ConvolveOp(new Kernel(radius, radius, matrix));
-		return op.filter(img, newImg);
+		BufferedImageOp averageBlurOp = new ConvolveOp(new Kernel(radius,
+				radius, matrix));
+		return averageBlurOp.filter(img, null);
 	}
 
 	/**
@@ -171,19 +180,17 @@ public class BgSubtract {
 						.getRed() <= bgColour.getRed() + threshold)
 						&& (imgColour.getGreen() >= bgColour.getGreen()
 								- threshold && imgColour.getGreen() <= bgColour
-								.getGreen()
-								+ threshold)
+								.getGreen() + threshold)
 						&& (imgColour.getBlue() >= bgColour.getBlue()
 								- threshold && imgColour.getBlue() <= bgColour
-								.getBlue()
-								+ threshold)) {
+								.getBlue() + threshold)) {
 					// if colours match, remove it
 					int red = imgColour.getRed() - bgColour.getRed();
 					int green = imgColour.getGreen() - bgColour.getGreen();
 					int blue = imgColour.getBlue() - bgColour.getBlue();
 
-					Color argh = new Color(fixColoursInRange(red),
-							fixColoursInRange(green), fixColoursInRange(blue));
+					Color argh = new Color(clipColoursInRange(red),
+							clipColoursInRange(green), clipColoursInRange(blue));
 
 					newImage.setRGB(x, y, argh.getRGB());
 					// newImage.setRGB(x, y, 0);
@@ -197,16 +204,13 @@ public class BgSubtract {
 		return newImage;
 	}
 
-	public static void saveImage(BufferedImage img, String name) {
-		File saveFile = new File(name + ".jpg");
-		try {
-			ImageIO.write(img, "jpg", saveFile);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	public static int fixColoursInRange(int colour) {
+	/**
+	 * Clips colours within 255, incase they went out.
+	 * 
+	 * @param colour
+	 * @return
+	 */
+	public static int clipColoursInRange(int colour) {
 		if (colour < 0) {
 			colour = 0;
 		}
@@ -214,5 +218,79 @@ public class BgSubtract {
 			colour = 255;
 		}
 		return colour;
+	}
+
+	/**
+	 * Loads an image file into a BufferedImage. Includes
+	 * stupidWorkAroundForJavaException().
+	 * 
+	 * @param filename
+	 *            The name of the image to load.
+	 * @param fileFormat
+	 *            The file format of the image to load.
+	 * @return The image in bufferedImage form.
+	 */
+	public static BufferedImage loadImage(String filename, String fileFormat) {
+		BufferedImage img = null;
+		try {
+			img = ImageIO.read(new File("png\\" + filename + fileFormat));
+			img = stupidWorkAroundForJavaException(img);
+		} catch (IOException e) {
+			System.out.println("File not found! " + filename + fileFormat);
+			e.printStackTrace();
+		}
+		return img;
+	}
+
+	/**
+	 * Saves a Buffered Image with the given file name.
+	 * 
+	 * @param img
+	 *            The BufferedImage to save.
+	 * @param name
+	 *            The file name to use.
+	 */
+	public static void saveImage(BufferedImage img, String name) {
+		File saveFile = new File(name + fileFormat);
+		try {
+			if (fileFormat.equals(".jpg")) {
+				ImageIO.write(img, "jpg", saveFile);
+			} else if (fileFormat.equals(".png")) {
+				ImageIO.write(img, "png", saveFile);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * A completely stupid retarded work-around for a completely stupid retarded
+	 * java exception. If you take a Buffered Image through ImageIO.read(new
+	 * File("filename.jpg")), then pass that to ConvolveOp, it throws an error:
+	 * 
+	 * Exception in thread "main" java.awt.image.ImagingOpException: Unable to
+	 * convolve src image at java.awt.image.ConvolveOp.filter(Unknown Source) at
+	 * bgSubtract.BgSubtract.averageBlur(BgSubtract.java:159) at
+	 * bgSubtract.BgSubtract.main(BgSubtract.java:74)
+	 * 
+	 * By copying it elem by elem to a new image, and then putting that back, it
+	 * suddenly works! Magic!!
+	 * 
+	 * Bug has been around for years:
+	 * http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4957775
+	 * 
+	 * @param input
+	 * @return
+	 */
+	public static BufferedImage stupidWorkAroundForJavaException(
+			BufferedImage input) {
+		BufferedImage tmp = new BufferedImage(input.getWidth(),
+				input.getHeight(), BufferedImage.TYPE_INT_RGB);
+		for (int x = 0; x < input.getWidth(); x++) {
+			for (int y = 0; y < input.getHeight(); y++) {
+				tmp.setRGB(x, y, input.getRGB(x, y));
+			}
+		}
+		return tmp;
 	}
 }
