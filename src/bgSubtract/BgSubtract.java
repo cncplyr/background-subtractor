@@ -90,9 +90,9 @@ public class BgSubtract {
 
 		for (int bgID = 0; bgID < noOfBgImgs; bgID++) {
 			// Get each image, blur it, add it to the list
-			String currentBgFilename = formatFileName("background", noOfBgImgs);
-			System.out.print(currentBgFilename);
+			String currentBgFilename = formatFileName("background", bgID);
 			BufferedImage currentImg = loadImage(currentBgFilename, fileFormat);
+			System.out.print(currentBgFilename);
 			bgImgs.add(averageBlur(currentImg, blurRadius));
 			System.out.println("\tDone!");
 		}
@@ -112,7 +112,7 @@ public class BgSubtract {
 
 			// Subtract taht shizzle!!
 			saveImage(removeBackground(currentImg),
-					"output" + Integer.toString(imageID - fgImgStartNumber));
+					formatFileName("output", imageID - fgImgStartNumber));
 			System.out.println("\tDone!");
 		}
 		System.out.println("\nComplete!");
