@@ -18,18 +18,18 @@ import javax.imageio.ImageIO;
  * 
  */
 public class BgSubtract {
-	private static int noOfBgImgs = 2; // # background images
-	private static int noOfFgImgs = 5; // # foreground images
-	private static int fgImgStartNumber = 38; // foreground start number
-	private static BufferedImage bgImg = null;
-	private static BufferedImage currentImg = null;
+	private static int noOfBgImgs = 0; // # background images
+	private static int noOfFgImgs = 0; // # foreground images
+	private static int fgImgStartNumber = 0; // foreground start number
 	private static int threshold = 10;
 	private static int blurRadius = 10;
 	private static String fileFormat = ".png";
-	private static long startTime;
-	private static long endTime;
 	private static String inputFolder = "input";
 	private static String outputFolder = "output";
+	private static BufferedImage bgImg = null;
+	private static BufferedImage currentImg = null;
+	private static long startTime;
+	private static long endTime;
 
 	public static void main(String[] args) throws Exception {
 		startTime = System.currentTimeMillis();
@@ -37,7 +37,7 @@ public class BgSubtract {
 		System.out.println("         Background Subtractor");
 		System.out.println("=======================================");
 
-		// Take arguments for number of background images
+		/* Take arguments for number of background images */
 		for (int i = 0; i < args.length; i++) {
 			if (i + 1 < args.length) {
 				if (args[i].equals("-bg")) {
