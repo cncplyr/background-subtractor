@@ -18,9 +18,9 @@ import javax.imageio.ImageIO;
  * 
  */
 public class BgSubtract {
-	private static int noOfBgImgs = 0; // # background images
-	private static int noOfFgImgs = 0; // # foreground images
-	private static int fgImgStartNumber = 0; // foreground start number
+	private static int noOfBgImgs = 2; // # background images
+	private static int noOfFgImgs = 5; // # foreground images
+	private static int fgImgStartNumber = 38; // foreground start number
 	private static BufferedImage bgImg = null;
 	private static BufferedImage currentImg = null;
 	private static int threshold = 10;
@@ -87,12 +87,14 @@ public class BgSubtract {
 		/* Background Image Creation */
 		System.out.println("Creating background...");
 		List<BufferedImage> bgImgs = new ArrayList<BufferedImage>();
-		while (noOfBgImgs > 0) {
+
+		for (int bgID = 0; bgID < noOfBgImgs; bgID++) {
 			// Get each image, blur it, add it to the list
-			BufferedImage currentImg = loadImage("background" + noOfBgImgs,
-					fileFormat);
+			String currentBgFilename = formatFileName("background", noOfBgImgs);
+			System.out.print(currentBgFilename);
+			BufferedImage currentImg = loadImage(currentBgFilename, fileFormat);
 			bgImgs.add(averageBlur(currentImg, blurRadius));
-			noOfBgImgs--;
+			System.out.println("\tDone!");
 		}
 		// Combine the background images
 		bgImg = combineImages(bgImgs);
@@ -264,7 +266,7 @@ public class BgSubtract {
 
 		// Check if method worked before returning.
 		if (img == null) {
-			throw new Exception("File failed to load");
+			throw new Exception("File failed to load!");
 		}
 
 		return img;
@@ -295,15 +297,15 @@ public class BgSubtract {
 
 	public static String formatFileName(String name, int imageID) {
 		if (imageID > 9999) {
-			name = "image" + Integer.toString(imageID);
+			name = name + Integer.toString(imageID);
 		} else if (imageID > 999) {
-			name = "image0" + Integer.toString(imageID);
+			name = name + "0" + Integer.toString(imageID);
 		} else if (imageID > 99) {
-			name = "image00" + Integer.toString(imageID);
+			name = name + "00" + Integer.toString(imageID);
 		} else if (imageID > 9) {
-			name = "image000" + Integer.toString(imageID);
+			name = name + "000" + Integer.toString(imageID);
 		} else {
-			name = "image0000" + Integer.toString(imageID);
+			name = name + "0000" + Integer.toString(imageID);
 		}
 		return name;
 	}
