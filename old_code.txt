@@ -1,3 +1,8 @@
+				// for crazy colours, jsut do newImage.setRGB(x, y,
+				// img[0].getRGB - img[1].getRGB);
+
+
+
 	/**
 	 * Returns the image flipped vertically.
 	 * 
