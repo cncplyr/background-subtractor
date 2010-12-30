@@ -1,3 +1,43 @@
+
+/// START MEAN Pairs code ///
+		/* Calculates using mean values */
+		// int counter = 1;
+		// for (String imageName : imageNames) {
+		// if (Integer.parseInt(imageName.substring(5, 10)) % 1 == 0) {
+		// Long time = System.nanoTime();
+		// System.out.print(imageName + " " + counter);
+		// returnImage = imageCombiner.averageTwoImagesIncremental(returnImage,
+		// fileHandler.loadImage(imageName), counter++);
+		// System.out.println("\t" + (System.nanoTime() - time));
+		// }
+		// }
+		
+/// END MEAN Pairs code /// 
+
+
+/// START MEDIAN 10's Code ////
+
+		List<BufferedImage> medianOfEveryTenImages = new ArrayList<BufferedImage>();
+
+		int numberOfSubMedians = imageNames.length / 10;
+		List<BufferedImage> everyTenImages = new ArrayList<BufferedImage>();
+
+		for (int i = 0; i < numberOfSubMedians; i++) {
+			for (int j = 0; j < 10; j++) {
+				everyTenImages.add(fileHandler.loadImage(imageNames[(10 * i) + j]));
+			}
+			medianOfEveryTenImages.add(imageCombiner.averageMedianImages(everyTenImages));
+			everyTenImages.clear();
+			System.gc();
+		}
+
+		BufferedImage returnImage = imageCombiner.averageMedianImages(medianOfEveryTenImages);
+
+/// END MEDIAN 10's Code ///
+
+
+
+
 				// for crazy colours, jsut do newImage.setRGB(x, y,
 				// img[0].getRGB - img[1].getRGB);
 

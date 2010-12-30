@@ -30,7 +30,7 @@ import javax.imageio.ImageIO;
  */
 public class BgSubtract {
 	private static int threshold = 10;
-	private static int blurRadius = 10;
+	private static int blurRadius = 11; // must be odd
 	private static String fileFormat = "png";
 	private static String inputFolder = "input";
 	private static String outputFolder = "output";
