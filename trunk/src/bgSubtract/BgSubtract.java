@@ -6,49 +6,79 @@ import java.awt.image.BufferedImageOp;
 import java.awt.image.ConvolveOp;
 import java.awt.image.Kernel;
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.imageio.ImageIO;
 
 /**
  * 
+ * This quick program will take a set of background images, and a set of
+ * foreground images, and remove the background from the foreground images,
+ * leaving transparent alpha behind.
+ * 
+ * Design Decision: The program actually gets a list of file names, then
+ * recurses through the file names to get each file and process them in turn.
+ * The reason for doing this rather than simply getting a List of Files or
+ * BufferedImages was because it was taking up a stupidly large amount of RAM,
+ * loading several hundred images at over 1MB each. Whilst I don't like this
+ * implementation, it will have to do.
+ * 
  * @author cncplyr
+ * @version 1.337
  * 
  */
 public class BgSubtract {
-	private static int noOfBgImgs = 0; // # background images
-	private static int noOfFgImgs = 0; // # foreground images
-	private static int fgImgStartNumber = 0; // foreground start number
 	private static int threshold = 10;
 	private static int blurRadius = 10;
-	private static String fileFormat = ".png";
+	private static String fileFormat = "png";
 	private static String inputFolder = "input";
 	private static String outputFolder = "output";
-	private static BufferedImage bgImg = null;
-	private static BufferedImage currentImg = null;
+	private static BufferedImage bgImg;
 	private static long startTime;
 	private static long endTime;
 
 	public static void main(String[] args) throws Exception {
 		startTime = System.currentTimeMillis();
+
 		System.out.println("=======================================");
 		System.out.println("         Background Subtractor");
 		System.out.println("=======================================");
 
-		/* Take arguments for number of background images */
+		checkArguments(args);
+
+		// Create output folder
+		new File(outputFolder).mkdir();
+
+		createBackgroundImage();
+		removeAllBackgrounds();
+
+		System.out.println("\nComplete!");
+		endTime = System.currentTimeMillis() - startTime;
+		System.out.println("Took " + endTime + "ms to complete.");
+		System.out.println("=======================================");
+
+		exitProgram();
+	}
+
+	/**
+	 * This method is here so we know where the exit is called from, rather than
+	 * having System.exit() calls littered around the code.
+	 * 
+	 */
+	private static void exitProgram() {
+		System.exit(0);
+	}
+
+	private static void checkArguments(String[] args) {
 		for (int i = 0; i < args.length; i++) {
 			if (i + 1 < args.length) {
-				if (args[i].equals("-bg")) {
-					// number of background images
-					noOfBgImgs = Integer.parseInt(args[i + 1]);
-				} else if (args[i].equals("-format")) {
+				if (args[i].equals("-format")) {
 					// image format
 					if (args[i + 1].equals("png")) {
-						fileFormat = ".png";
+						fileFormat = "png";
 					} else {
-						fileFormat = ".jpg";
+						fileFormat = "jpg";
 					}
 				} else if (args[i].equals("-inFolder")) {
 					// input folder
@@ -56,10 +86,6 @@ public class BgSubtract {
 				} else if (args[i].equals("-outFolder")) {
 					// output folder
 					outputFolder = args[i + 1];
-				} else if (args[i].equals("-startNo")) {
-					fgImgStartNumber = Integer.parseInt(args[i + 1]);
-				} else if (args[i].equals("-images")) {
-					noOfFgImgs = Integer.parseInt(args[i + 1]);
 				} else if (args[i].equals("-threshold")) {
 					threshold = Integer.parseInt(args[i + 1]);
 				} else if (args[i].equals("-blurRadius")) {
@@ -69,80 +95,92 @@ public class BgSubtract {
 				}
 			}
 		}
-
-		if (noOfBgImgs == 0 || noOfFgImgs == 0) {
-			printHelpMessage();
-			System.exit(0);
-		}
-
-		// Create output folder
-		new File(outputFolder).mkdir();
-
-		System.out.println("Number of background images:\t" + noOfBgImgs);
-		System.out.println("Number of foreground images:\t" + noOfFgImgs);
-		System.out.println("Blur Radius:\t\t\t" + blurRadius);
-		System.out.println("Colour Threshold:\t\t" + threshold);
-		System.out.println("---------------------------------------");
-
-		/* Background Image Creation */
-		System.out.println("Creating background...");
-		List<BufferedImage> bgImgs = new ArrayList<BufferedImage>();
-
-		for (int bgID = 0; bgID < noOfBgImgs; bgID++) {
-			// Get each image, blur it, add it to the list
-			String currentBgFilename = formatFileName("background", bgID);
-			BufferedImage currentImg = loadImage(currentBgFilename, fileFormat);
-			System.out.print(currentBgFilename);
-			bgImgs.add(averageBlur(currentImg, blurRadius));
-			System.out.println("\tDone!");
-		}
-		// Combine the background images
-		bgImg = combineImages(bgImgs);
-		System.out.println("Background created!\n");
-
-		/* Subtract Background */
-		System.out.println("Subtracting background...");
-		// Load foreground image
-		for (int imageID = fgImgStartNumber; imageID < fgImgStartNumber
-				+ noOfFgImgs; imageID++) {
-
-			String currentFilename = formatFileName("image", imageID);
-			currentImg = loadImage(currentFilename, fileFormat);
-			System.out.print(currentFilename);
-
-			// Subtract taht shizzle!!
-			saveImage(removeBackground(currentImg),
-					formatFileName("output", imageID - fgImgStartNumber));
-			System.out.println("\tDone!");
-		}
-		System.out.println("\nComplete!");
-		endTime = System.currentTimeMillis() - startTime;
-		System.out.println("Took " + endTime + "ms to complete.");
-		System.out.println("=======================================");
-		System.exit(0);
 	}
 
-	public static BufferedImage removeBackground(BufferedImage img) {
+	private static void createBackgroundImage() throws Exception {
+		System.out.println("Creating background...");
+
+		String[] bgImageNames = getAllFileNamesMatching("background");
+		if (bgImageNames.length < 1) {
+			printHelpMessage();
+			exitProgram();
+		} else {
+			System.out.print(bgImageNames[0]);
+			bgImg = averageBlur(loadImage(bgImageNames[0]), blurRadius);
+			System.out.println("\tDone!");
+			for (int i = 1; i < bgImageNames.length; i++) {
+				System.out.print(bgImageNames[i]);
+				combineTwoImages(bgImg, averageBlur(loadImage(bgImageNames[i]), blurRadius));
+				System.out.println("\tDone!");
+			}
+		}
+		saveImage(bgImg, "newBackground");
+		System.out.println("Background created!\n");
+	}
+
+	/**
+	 * Combines two images into the first image (average).
+	 * 
+	 * @param firstImage
+	 * @param additionalImage
+	 */
+	private static void combineTwoImages(BufferedImage firstImage, BufferedImage additionalImage) {
+		int height = firstImage.getHeight();
+		int width = firstImage.getWidth();
+	
+		int red = 0;
+		int green = 0;
+		int blue = 0;
+	
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				Color firstColour = new Color(firstImage.getRGB(x, y));
+				Color secondColour = new Color(additionalImage.getRGB(x, y));
+	
+				red = (firstColour.getRed() + secondColour.getRed()) / 2;
+				green = (firstColour.getGreen() + secondColour.getGreen()) / 2;
+				blue = (firstColour.getBlue() + secondColour.getBlue()) / 2;
+	
+				Color temp = new Color(red, green, blue, 255);
+	
+				firstImage.setRGB(x, y, temp.getRGB());
+			}
+		}
+	}
+
+	private static void removeAllBackgrounds() throws Exception {
+		System.out.println("Removing backgrounds...");
+		int counter = 0;
+
+		String[] fgImageNames = getAllFileNamesMatching("image");
+		if (fgImageNames.length < 1) {
+			printHelpMessage();
+			exitProgram();
+		} else {
+			for (String currentName : fgImageNames) {
+				System.out.print(currentName);
+				saveImage(removeBackground(loadImage(currentName)), formatFileName("output", counter++));
+				System.out.println("\tDone!");
+			}
+		}
+
+	}
+
+	private static BufferedImage removeBackground(BufferedImage img) {
 		int height = img.getHeight();
 		int width = img.getWidth();
 
 		BufferedImage imgBlurred = averageBlur(img, blurRadius);
-		BufferedImage newImage = new BufferedImage(width, height,
-				BufferedImage.TYPE_INT_ARGB);
+		BufferedImage newImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
 
 		for (int x = 0; x < width; x++) {
 			for (int y = 0; y < height; y++) {
 				Color bgColour = new Color(bgImg.getRGB(x, y));
 				Color imgColour = new Color(imgBlurred.getRGB(x, y));
 
-				if ((imgColour.getRed() >= bgColour.getRed() - threshold && imgColour
-						.getRed() <= bgColour.getRed() + threshold)
-						&& (imgColour.getGreen() >= bgColour.getGreen()
-								- threshold && imgColour.getGreen() <= bgColour
-								.getGreen() + threshold)
-						&& (imgColour.getBlue() >= bgColour.getBlue()
-								- threshold && imgColour.getBlue() <= bgColour
-								.getBlue() + threshold)) {
+				if ((imgColour.getRed() >= bgColour.getRed() - threshold && imgColour.getRed() <= bgColour.getRed() + threshold)
+						&& (imgColour.getGreen() >= bgColour.getGreen() - threshold && imgColour.getGreen() <= bgColour.getGreen() + threshold)
+						&& (imgColour.getBlue() >= bgColour.getBlue() - threshold && imgColour.getBlue() <= bgColour.getBlue() + threshold)) {
 					// if colours match, remove it
 					Color argh = new Color(0, 0, 0, 0);
 					newImage.setRGB(x, y, argh.getRGB());
@@ -157,41 +195,7 @@ public class BgSubtract {
 	}
 
 	/**
-	 * Combines BufferedImages.
-	 * 
-	 * @param img
-	 *            Array of images to combine.
-	 * @return A single image of average pixel values of the inputs.
-	 * @throws Exception
-	 */
-	public static BufferedImage combineImages(List<BufferedImage> img)
-			throws Exception {
-		int height0 = img.get(0).getHeight();
-		int width0 = img.get(0).getWidth();
-
-		BufferedImage newImage = new BufferedImage(width0, height0,
-				BufferedImage.TYPE_INT_ARGB);
-
-		for (int x = 0; x < width0; x++) {
-			for (int y = 0; y < height0; y++) {
-				Color c0 = new Color(img.get(0).getRGB(x, y));
-				Color c1 = new Color(img.get(1).getRGB(x, y));
-
-				int red = (c0.getRed() + c1.getRed()) / 2;
-				int green = (c0.getGreen() + c1.getGreen()) / 2;
-				int blue = (c0.getBlue() + c1.getBlue()) / 2;
-
-				Color blah = new Color(red, green, blue, 255);
-
-				newImage.setRGB(x, y, blah.getRGB());
-			}
-		}
-		saveImage(newImage, "newbackground");
-		return newImage;
-	}
-
-	/**
-	 * Simple average blur
+	 * Simple average blur.
 	 * 
 	 * @param img
 	 *            The image to blur.
@@ -199,11 +203,10 @@ public class BgSubtract {
 	 *            The radius of the blur to apply.
 	 * @return The Blurred Image.
 	 */
-	public static BufferedImage averageBlur(BufferedImage img, int radius) {
+	private static BufferedImage averageBlur(BufferedImage img, int radius) {
 		float[] matrix = createAverageMatrix(radius);
 
-		BufferedImageOp averageBlurOp = new ConvolveOp(new Kernel(radius,
-				radius, matrix));
+		BufferedImageOp averageBlurOp = new ConvolveOp(new Kernel(radius, radius, matrix));
 		return averageBlurOp.filter(img, null);
 	}
 
@@ -214,7 +217,7 @@ public class BgSubtract {
 	 *            The size of one side of the matrix.
 	 * @return A matrix.
 	 */
-	public static float[] createAverageMatrix(int size) {
+	private static float[] createAverageMatrix(int size) {
 		int cells = size * size;
 		float[] matrix = new float[cells];
 
@@ -225,20 +228,32 @@ public class BgSubtract {
 		return matrix;
 	}
 
+
+
 	/**
-	 * Clips colours within 255, incase they went out.
+	 * Gets all the files in a the input folder, where the beginning of the
+	 * files start with the name filter. E.g. nameFilter = "test", it will
+	 * return all the file names matching test*.
 	 * 
-	 * @param colour
-	 * @return
+	 * @param nameFilter
+	 *            The beginning of the name to find.
+	 * @return A list of matching file names.
 	 */
-	public static int clipColoursInRange(int colour) {
-		if (colour < 0) {
-			colour = 0;
+	private static String[] getAllFileNamesMatching(final String nameFilter) {
+		File folder = new File(inputFolder);
+		FilenameFilter filter = null;
+
+		// Returns all files in the folder if (nameFilter == null)
+		if (nameFilter != null) {
+			filter = new FilenameFilter() {
+				@Override
+				public boolean accept(File folder, String name) {
+					return name.startsWith(nameFilter);
+				}
+			};
 		}
-		if (colour > 255) {
-			colour = 255;
-		}
-		return colour;
+
+		return folder.list(filter);
 	}
 
 	/**
@@ -252,15 +267,13 @@ public class BgSubtract {
 	 * @return The image in bufferedImage form.
 	 * @throws Exception
 	 */
-	public static BufferedImage loadImage(String filename, String fileFormat)
-			throws Exception {
+	private static BufferedImage loadImage(String filename) throws Exception {
 		BufferedImage img = null;
 		try {
-			img = ImageIO.read(new File(inputFolder + File.separator + filename
-					+ fileFormat));
+			img = ImageIO.read(new File(inputFolder + File.separator + filename));
 			img = stupidWorkAroundForJavaException(img);
 		} catch (IOException e) {
-			System.out.println("File not found! " + filename + fileFormat);
+			System.out.println("File not found! " + filename);
 			e.printStackTrace();
 		}
 
@@ -280,14 +293,13 @@ public class BgSubtract {
 	 * @param name
 	 *            The file name to use.
 	 */
-	public static void saveImage(BufferedImage img, String name) {
-		File saveFile = new File(outputFolder + File.separator + name
-				+ fileFormat);
+	private static void saveImage(BufferedImage img, String name) {
+		File saveFile = new File(outputFolder + File.separator + name + "." + fileFormat);
 
 		try {
-			if (fileFormat.equals(".jpg")) {
+			if (fileFormat.equals("jpg")) {
 				ImageIO.write(img, "jpg", saveFile);
-			} else if (fileFormat.equals(".png")) {
+			} else if (fileFormat.equals("png")) {
 				ImageIO.write(img, "png", saveFile);
 			}
 		} catch (IOException e) {
@@ -295,7 +307,17 @@ public class BgSubtract {
 		}
 	}
 
-	public static String formatFileName(String name, int imageID) {
+	/**
+	 * Take a name and an Id number, and appends them. Adds leading zeros to the
+	 * number to create a 5-digit number.
+	 * 
+	 * @param name
+	 *            The filename to use.
+	 * @param imageID
+	 *            The file ID number to use.
+	 * @return The complete name in the correct format.
+	 */
+	private static String formatFileName(String name, int imageID) {
 		if (imageID > 9999) {
 			name = name + Integer.toString(imageID);
 		} else if (imageID > 999) {
@@ -310,34 +332,25 @@ public class BgSubtract {
 		return name;
 	}
 
-	public static void printHelpMessage() {
+	private static void printHelpMessage() {
 		System.out.println("README");
 		System.out.println("=============");
 		System.out
 				.println("This program will take a set of background images, and a set of foreground images, and remove the background from the foreground images, leaving transparent alpha behind.");
-		System.out
-				.println("If the input image files are not in the correct place, or referenced properly, the program will fail. You have been warned!");
+		System.out.println("If the input image files are not in the correct place, or referenced properly, the program will fail. You have been warned!");
 		System.out.println("=============");
 		System.out.println("USAGE:");
-		System.out
-				.println("\n\nYOU WILL ALWAYS WANT TO USE -bg, -startNo and -images\n\n");
 		System.out
 				.println("Background images must be called \"backgroundxxxxx.png\" where xxxxx is the id number, starting from 00000, with 5 digits total (leading zeros).");
 		System.out
 				.println("Foreground images must be called \"imagexxxxx.png\" where xxxxx is the id number, starting from 00000, with 5 digits total (leading zeros).");
-		System.out
-				.println("All input images must be in a subfolder called \"input\", unless modified.");
-		System.out
-				.println("All output images will be placed in a subfolder called \"output\", unless modified.");
+		System.out.println("All input images must be in a subfolder called \"input\", unless modified.");
+		System.out.println("All output images will be placed in a subfolder called \"output\", unless modified.");
 		System.out.println("=============");
 		System.out.println("Argument\tEffect");
-		System.out.println("-inFormat\tImage Input format: png OR jpg");
 		System.out.println("-outFormat\tImage Output format: png OR jpg");
 		System.out.println("-inFolder\tImage Input folder override");
 		System.out.println("-outFolder\tImage Output folder override");
-		System.out.println("-bg\t\tNumber of background images");
-		System.out.println("-startNo\tStart number of Foreground Images");
-		System.out.println("-images\t\tNumber of Foreground Images");
 		System.out.println("-threshold\tThreshold of colours for subtraction");
 		System.out.println("-blurRadius\tRadius of Average Blur applied");
 		System.out.println("--help\t\tDisplays this message");
@@ -354,8 +367,7 @@ public class BgSubtract {
 	 * bgSubtract.BgSubtract.averageBlur(BgSubtract.java:159) at
 	 * bgSubtract.BgSubtract.main(BgSubtract.java:74)
 	 * 
-	 * By copying it elem by elem to a new image, and then putting that back, it
-	 * suddenly works! Magic!!
+	 * By copying it elem by elem to a new image, it suddenly works! Magic!!
 	 * 
 	 * Bug has been around for years:
 	 * http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4957775
@@ -363,10 +375,8 @@ public class BgSubtract {
 	 * @param input
 	 * @return
 	 */
-	public static BufferedImage stupidWorkAroundForJavaException(
-			BufferedImage input) {
-		BufferedImage tmp = new BufferedImage(input.getWidth(),
-				input.getHeight(), BufferedImage.TYPE_INT_ARGB);
+	private static BufferedImage stupidWorkAroundForJavaException(BufferedImage input) {
+		BufferedImage tmp = new BufferedImage(input.getWidth(), input.getHeight(), BufferedImage.TYPE_INT_ARGB);
 		for (int x = 0; x < input.getWidth(); x++) {
 			for (int y = 0; y < input.getHeight(); y++) {
 				tmp.setRGB(x, y, input.getRGB(x, y));
