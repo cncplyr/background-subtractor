@@ -112,6 +112,7 @@ public class BgSubtract {
 				System.out.print(bgImageNames[i]);
 				combineTwoImages(bgImg, averageBlur(loadImage(bgImageNames[i]), blurRadius));
 				System.out.println("\tDone!");
+				System.gc();
 			}
 		}
 		saveImage(bgImg, "newBackground");
@@ -161,9 +162,9 @@ public class BgSubtract {
 				System.out.print(currentName);
 				saveImage(removeBackground(loadImage(currentName)), formatFileName("output", counter++));
 				System.out.println("\tDone!");
+				System.gc();
 			}
 		}
-
 	}
 
 	private static BufferedImage removeBackground(BufferedImage img) {
