@@ -25,7 +25,7 @@ import javax.imageio.ImageIO;
  * implementation, it will have to do.
  * 
  * @author cncplyr
- * @version 1.337
+ * @version 1.0
  * 
  */
 public class BgSubtract {
