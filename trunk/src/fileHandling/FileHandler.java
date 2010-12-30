@@ -4,21 +4,22 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.imageio.ImageIO;
 
+/**
+ * 
+ * @author cncplyr
+ * 
+ */
 public class FileHandler {
 	private String inputFolder = "input";
 	private String outputFolder = "output";
 	private String fileFormat = "png";
 
 	public FileHandler() {
-	}
-
-	public FileHandler(String inputFolder, String outputFolder, String fileFormat) {
-		this.setInputFolder(inputFolder);
-		this.setOutputFolder(outputFolder);
-		this.setFileFormat(fileFormat);
 	}
 
 	/**
@@ -33,7 +34,7 @@ public class FileHandler {
 	 * @return A list of matching file names.
 	 */
 	public String[] getAllFileNamesMatching(final String nameFilter) {
-		File folder = new File(getInputFolder());
+		File folder = new File(inputFolder);
 		FilenameFilter filter = null;
 
 		// Returns all files in the folder if (nameFilter == null)
@@ -47,6 +48,26 @@ public class FileHandler {
 		}
 
 		return folder.list(filter);
+	}
+
+	public List<BufferedImage> getAllImagesMatching(final String nameFilter) {
+		File folder = new File(inputFolder);
+		FilenameFilter filter = new FilenameFilter() {
+			@Override
+			public boolean accept(File folder, String name) {
+				return name.startsWith(nameFilter);
+			}
+		};
+
+		List<BufferedImage> images = new ArrayList<BufferedImage>();
+
+		File[] files = folder.listFiles(filter);
+
+		for (File eachFile : files) {
+			images.add(loadImageFromFile(eachFile));
+		}
+
+		return images;
 	}
 
 	/**
@@ -63,7 +84,7 @@ public class FileHandler {
 	public BufferedImage loadImage(String filename) throws Exception {
 		BufferedImage img = null;
 		try {
-			img = ImageIO.read(new File(getInputFolder() + File.separator + filename));
+			img = ImageIO.read(new File(inputFolder + File.separator + filename));
 			img = stupidWorkAroundForJavaException(img);
 		} catch (IOException e) {
 			System.out.println("File not found! " + filename);
@@ -78,6 +99,17 @@ public class FileHandler {
 		return img;
 	}
 
+	public BufferedImage loadImageFromFile(File file) {
+		BufferedImage img = null;
+		try {
+			img = stupidWorkAroundForJavaException(ImageIO.read(file));
+		} catch (IOException e) {
+			System.out.println("File is not an image!");
+			e.printStackTrace();
+		}
+		return img;
+	}
+
 	/**
 	 * Saves a Buffered Image with the given file name.
 	 * 
@@ -87,12 +119,12 @@ public class FileHandler {
 	 *            The file name to use.
 	 */
 	public void saveImage(BufferedImage img, String name) {
-		File saveFile = new File(getOutputFolder() + File.separator + name + "." + getFileFormat());
+		File saveFile = new File(outputFolder + File.separator + name + "." + fileFormat);
 
 		try {
-			if (getFileFormat().equals("jpg")) {
+			if (fileFormat.equals("jpg")) {
 				ImageIO.write(img, "jpg", saveFile);
-			} else if (getFileFormat().equals("png")) {
+			} else if (fileFormat.equals("png")) {
 				ImageIO.write(img, "png", saveFile);
 			}
 		} catch (IOException e) {

@@ -5,6 +5,11 @@ import java.awt.image.BufferedImageOp;
 import java.awt.image.ConvolveOp;
 import java.awt.image.Kernel;
 
+/**
+ * 
+ * @author cncplyr
+ *
+ */
 public class ImageBlurrer {
 
 	public ImageBlurrer() {
