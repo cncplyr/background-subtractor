@@ -37,6 +37,7 @@ public class BgSubtract {
 	private static BufferedImage bgImg;
 	private static long startTime;
 	private static long endTime;
+	private static Color alpha = new Color(0, 0, 0, 0);
 
 	public static void main(String[] args) throws Exception {
 		startTime = System.currentTimeMillis();
@@ -128,22 +129,22 @@ public class BgSubtract {
 	private static void combineTwoImages(BufferedImage firstImage, BufferedImage additionalImage) {
 		int height = firstImage.getHeight();
 		int width = firstImage.getWidth();
-	
+
 		int red = 0;
 		int green = 0;
 		int blue = 0;
-	
+
 		for (int x = 0; x < width; x++) {
 			for (int y = 0; y < height; y++) {
 				Color firstColour = new Color(firstImage.getRGB(x, y));
 				Color secondColour = new Color(additionalImage.getRGB(x, y));
-	
+
 				red = (firstColour.getRed() + secondColour.getRed()) / 2;
 				green = (firstColour.getGreen() + secondColour.getGreen()) / 2;
 				blue = (firstColour.getBlue() + secondColour.getBlue()) / 2;
-	
+
 				Color temp = new Color(red, green, blue, 255);
-	
+
 				firstImage.setRGB(x, y, temp.getRGB());
 			}
 		}
@@ -183,8 +184,8 @@ public class BgSubtract {
 						&& (imgColour.getGreen() >= bgColour.getGreen() - threshold && imgColour.getGreen() <= bgColour.getGreen() + threshold)
 						&& (imgColour.getBlue() >= bgColour.getBlue() - threshold && imgColour.getBlue() <= bgColour.getBlue() + threshold)) {
 					// if colours match, remove it
-					Color argh = new Color(0, 0, 0, 0);
-					newImage.setRGB(x, y, argh.getRGB());
+
+					newImage.setRGB(x, y, alpha.getRGB());
 				} else {
 					// else copy (NON-BLURRED VERSION) over
 					newImage.setRGB(x, y, img.getRGB(x, y));

@@ -11,9 +11,9 @@ import java.util.List;
 public class AverageFinder {
 
 	public int findMedian(List<Integer> numbers) {
-		if (numbers.size() < 1) {
+		if (numbers.size() < 2) {
 			throw new IllegalArgumentException(
-					"Cannot find average(median) of an empty list of numbers!");
+					"Cannot find average(median) of less than 2 numbers!");
 		}
 		int size = numbers.size();
 		Collections.sort(numbers);

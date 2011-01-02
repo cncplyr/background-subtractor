@@ -43,7 +43,7 @@ public class BackgroundCreator {
 		Long startTime = System.nanoTime();
 
 		fileHandler.setInputFolder("input");
-		fileHandler.setOutputFolder("output");
+		fileHandler.setOutputFolder("outputTEST");
 		String[] imageNames = fileHandler.getAllFileNamesMatching(fileName);
 		int noOfImages = imageNames.length;
 		List<BufferedImage> images = new ArrayList<BufferedImage>();
@@ -71,9 +71,7 @@ public class BackgroundCreator {
 
 		BufferedImage returnImage = imageCombiner.averageMedianImages(images);
 		/* End 10ths 20ths or 30ths */
-
-
-
+	
 
 		// /* Divide into any number of subdivisions */
 		// BufferedImage tmp = fileHandler.loadImage(imageNames[0]);
@@ -168,8 +166,8 @@ public class BackgroundCreator {
 		// imageCombiner.combineImageQuarters(fileHandler.getAllImagesMatching("bgImage"));
 		// /* End Divide into quarters */
 
-		returnImage = imageBlur.averageBlur(returnImage, 3);
 
+//		returnImage = imageBlur.medianBlur(returnImage, 1);
 		System.out.println("Created! Time Taken: " + ((System.nanoTime() - startTime) / 1000000000) + " secs");
 		fileHandler.saveImage(returnImage, "backgroundImage");
 		return returnImage;
