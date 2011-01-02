@@ -119,6 +119,8 @@ public class FileHandler {
 	 *            The file name to use.
 	 */
 	public void saveImage(BufferedImage img, String name) {
+		new File(outputFolder).mkdir();
+
 		File saveFile = new File(outputFolder + File.separator + name + "." + fileFormat);
 
 		try {

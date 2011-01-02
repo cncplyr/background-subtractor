@@ -6,9 +6,10 @@ import java.awt.image.ConvolveOp;
 import java.awt.image.Kernel;
 
 /**
+ * TODO: This class doesn't work... null pointer exceptions...
  * 
  * @author cncplyr
- *
+ * 
  */
 public class ImageBlurrer {
 
@@ -17,19 +18,23 @@ public class ImageBlurrer {
 	}
 
 	/**
-	 * Simple average blur.
+	 * Simple average(mean) blur.
 	 * 
 	 * @param img
 	 *            The image to blur.
-	 * @param radius
-	 *            The radius of the blur to apply.
+	 * @param size
+	 *            The size of the blur to apply.
 	 * @return The Blurred Image.
 	 */
-	public BufferedImage averageBlur(BufferedImage img, int radius) {
-		float[] matrix = createAverageMatrix(radius);
+	public BufferedImage averageBlur(BufferedImage img, int size) {
+		float[] matrix = createAverageMatrix(size);
 
-		BufferedImageOp averageBlurOp = new ConvolveOp(new Kernel(radius, radius, matrix));
+		BufferedImageOp averageBlurOp = new ConvolveOp(new Kernel(size, size, matrix), ConvolveOp.EDGE_NO_OP, null);
 		return averageBlurOp.filter(img, null);
+	}
+	
+	public BufferedImage medianBlur(BufferedImage img, int size){
+		return img;
 	}
 
 	/**
