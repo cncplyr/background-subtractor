@@ -14,7 +14,6 @@ public class Main {
 
 		try {
 			BufferedImage test = backgroundCreator.createBackground();
-			fileHandler.saveImage(test, "backgroundTest");
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
