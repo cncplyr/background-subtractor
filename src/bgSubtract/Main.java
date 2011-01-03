@@ -26,7 +26,7 @@ public class Main {
 
 		fileHandler.setInputFolder("input");
 		fileHandler.setOutputFolder("outputTEST");
-		String[] imageNames = fileHandler.getAllFileNamesMatching(fileName);
+		String[] imageNames = fileHandler.loadAllFileNamesMatching(fileName);
 		for (String name : imageNames) {
 			try {
 				BufferedImage currentImage = fileHandler.loadImage(name);
