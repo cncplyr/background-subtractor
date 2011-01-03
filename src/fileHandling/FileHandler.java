@@ -176,7 +176,7 @@ public class FileHandler {
 	 * @param input
 	 * @return
 	 */
-	private static BufferedImage stupidWorkAroundForJavaException(BufferedImage input) {
+	public static BufferedImage stupidWorkAroundForJavaException(BufferedImage input) {
 		BufferedImage tmp = new BufferedImage(input.getWidth(), input.getHeight(), BufferedImage.TYPE_INT_ARGB);
 		for (int x = 0; x < input.getWidth(); x++) {
 			for (int y = 0; y < input.getHeight(); y++) {

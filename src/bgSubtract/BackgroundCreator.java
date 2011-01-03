@@ -167,7 +167,7 @@ public class BackgroundCreator {
 		// /* End Divide into quarters */
 
 
-//		returnImage = imageBlur.medianBlur(returnImage, 1);
+		returnImage = imageBlur.averageBlur(returnImage, 11);
 		System.out.println("Created! Time Taken: " + ((System.nanoTime() - startTime) / 1000000000) + " secs");
 		fileHandler.saveImage(returnImage, "backgroundImage");
 		return returnImage;

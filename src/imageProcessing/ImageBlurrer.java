@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import fileHandling.FileHandler;
+
 import maths.AverageFinder;
 
 /**
@@ -35,8 +37,12 @@ public class ImageBlurrer {
 	public BufferedImage averageBlur(BufferedImage img, int size) {
 		float[] matrix = createAverageMatrix(size);
 
-		BufferedImageOp averageBlurOp = new ConvolveOp(new Kernel(size, size, matrix), ConvolveOp.EDGE_NO_OP, null);
-		return averageBlurOp.filter(img, null);
+		BufferedImage copiedImage = FileHandler.stupidWorkAroundForJavaException(img);
+		
+		BufferedImageOp averageBlurOp = new ConvolveOp(new Kernel(size, size, matrix));
+		// BufferedImageOp averageBlurOp = new ConvolveOp(new Kernel(size, size,
+		// matrix), ConvolveOp.EDGE_NO_OP, null);
+		return averageBlurOp.filter(copiedImage, null);
 	}
 
 	/**
@@ -95,7 +101,6 @@ public class ImageBlurrer {
 		for (float cell : matrix) {
 			cell = 1.0f / (float) cells;
 		}
-
 		return matrix;
 	}
 }
