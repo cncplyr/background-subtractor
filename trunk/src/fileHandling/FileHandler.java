@@ -12,6 +12,7 @@ import javax.imageio.ImageIO;
 /**
  * 
  * @author cncplyr
+ * @version 0.1
  * 
  */
 public class FileHandler {
@@ -33,7 +34,7 @@ public class FileHandler {
 	 *            The beginning of the name to find.
 	 * @return A list of matching file names.
 	 */
-	public String[] getAllFileNamesMatching(final String nameFilter) {
+	public String[] loadAllFileNamesMatching(final String nameFilter) {
 		File folder = new File(inputFolder);
 		FilenameFilter filter = null;
 
@@ -46,28 +47,7 @@ public class FileHandler {
 				}
 			};
 		}
-
 		return folder.list(filter);
-	}
-
-	public List<BufferedImage> getAllImagesMatching(final String nameFilter) {
-		File folder = new File(inputFolder);
-		FilenameFilter filter = new FilenameFilter() {
-			@Override
-			public boolean accept(File folder, String name) {
-				return name.startsWith(nameFilter);
-			}
-		};
-
-		List<BufferedImage> images = new ArrayList<BufferedImage>();
-
-		File[] files = folder.listFiles(filter);
-
-		for (File eachFile : files) {
-			images.add(loadImageFromFile(eachFile));
-		}
-
-		return images;
 	}
 
 	/**
@@ -108,6 +88,26 @@ public class FileHandler {
 			e.printStackTrace();
 		}
 		return img;
+	}
+
+	public List<BufferedImage> loadAllImagesMatching(final String nameFilter) {
+		File folder = new File(inputFolder);
+		FilenameFilter filter = new FilenameFilter() {
+			@Override
+			public boolean accept(File folder, String name) {
+				return name.startsWith(nameFilter);
+			}
+		};
+	
+		List<BufferedImage> images = new ArrayList<BufferedImage>();
+	
+		File[] files = folder.listFiles(filter);
+	
+		for (File eachFile : files) {
+			images.add(loadImageFromFile(eachFile));
+		}
+	
+		return images;
 	}
 
 	/**

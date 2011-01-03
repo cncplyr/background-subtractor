@@ -24,21 +24,6 @@ public class ImageCombiner {
 		fileHandler = new FileHandler();
 	}
 
-	public BufferedImage combineImageQuarters(List<BufferedImage> inputImages) throws Exception {
-		if (inputImages.size() != 4) {
-			throw new Exception("Cannot combine 4 images if there are not 4 images");
-		}
-		int width = inputImages.get(0).getWidth();
-		int height = inputImages.get(0).getHeight();
-		BufferedImage returnImage = new BufferedImage(2 * width, 2 * height, BufferedImage.TYPE_INT_ARGB);
-		returnImage.setRGB(0, 0, width, height, inputImages.get(0).getRGB(0, 0, width, height, null, 0, width), 0, width);
-		returnImage.setRGB(width, 0, width, height, inputImages.get(1).getRGB(0, 0, width, height, null, 0, width), 0, width);
-		returnImage.setRGB(0, height, width, height, inputImages.get(2).getRGB(0, 0, width, height, null, 0, width), 0, width);
-		returnImage.setRGB(width, height, width, height, inputImages.get(3).getRGB(0, 0, width, height, null, 0, width), 0, width);
-
-		return returnImage;
-	}
-
 	/**
 	 * Splits an image into horizontal slices. For 720p, this should be a
 	 * multiple of 720, e.g. 2, 4, 6, 8, 10, 12, 16, 18, 20, etc.
@@ -135,6 +120,21 @@ public class ImageCombiner {
 		for (int i = 0; i < images; i++) {
 			returnImage.setRGB(0, i * height, width, height, inputImages.get(i).getRGB(0, 0, width, height, null, 0, width), 0, width);
 		}
+		return returnImage;
+	}
+
+	public BufferedImage combineImageQuarters(List<BufferedImage> inputImages) throws Exception {
+		if (inputImages.size() != 4) {
+			throw new Exception("Cannot combine 4 images if there are not 4 images");
+		}
+		int width = inputImages.get(0).getWidth();
+		int height = inputImages.get(0).getHeight();
+		BufferedImage returnImage = new BufferedImage(2 * width, 2 * height, BufferedImage.TYPE_INT_ARGB);
+		returnImage.setRGB(0, 0, width, height, inputImages.get(0).getRGB(0, 0, width, height, null, 0, width), 0, width);
+		returnImage.setRGB(width, 0, width, height, inputImages.get(1).getRGB(0, 0, width, height, null, 0, width), 0, width);
+		returnImage.setRGB(0, height, width, height, inputImages.get(2).getRGB(0, 0, width, height, null, 0, width), 0, width);
+		returnImage.setRGB(width, height, width, height, inputImages.get(3).getRGB(0, 0, width, height, null, 0, width), 0, width);
+	
 		return returnImage;
 	}
 

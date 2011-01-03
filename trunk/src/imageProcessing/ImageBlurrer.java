@@ -98,20 +98,4 @@ public class ImageBlurrer {
 
 		return matrix;
 	}
-
-	/**
-	 * Makes a square matrix, where each cell is predefined as 0.0f.
-	 * 
-	 * @param size
-	 *            The size of one side of the matrix.
-	 * @return A matrix.
-	 */
-	public int[] createZeroedIntMatrix(int size) {
-		int[] matrix = new int[size * size];
-
-		for (int cell : matrix) {
-			cell = 0;
-		}
-		return matrix;
-	}
 }

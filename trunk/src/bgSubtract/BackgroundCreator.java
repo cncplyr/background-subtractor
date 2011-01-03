@@ -44,7 +44,7 @@ public class BackgroundCreator {
 
 		fileHandler.setInputFolder("input");
 		fileHandler.setOutputFolder("outputTEST");
-		String[] imageNames = fileHandler.getAllFileNamesMatching(fileName);
+		String[] imageNames = fileHandler.loadAllFileNamesMatching(fileName);
 		int noOfImages = imageNames.length;
 		List<BufferedImage> images = new ArrayList<BufferedImage>();
 
@@ -54,7 +54,7 @@ public class BackgroundCreator {
 
 		/* Take 1/10, 1/20 or 1/30 of the images to save RAM */
 		if (noOfImages < 200) {
-			images = fileHandler.getAllImagesMatching(fileName);
+			images = fileHandler.loadAllImagesMatching(fileName);
 		} else if ((noOfImages >= 200) && (noOfImages < 1500)) {
 			for (int i = 0; i < noOfImages; i = i + 10) {
 				images.add(fileHandler.loadImage(imageNames[i]));
