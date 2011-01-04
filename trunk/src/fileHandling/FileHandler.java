@@ -102,7 +102,7 @@ public class FileHandler {
 		List<BufferedImage> images = new ArrayList<BufferedImage>();
 	
 		File[] files = folder.listFiles(filter);
-	
+		
 		for (File eachFile : files) {
 			images.add(loadImageFromFile(eachFile));
 		}

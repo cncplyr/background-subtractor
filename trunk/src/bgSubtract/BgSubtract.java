@@ -12,6 +12,9 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 /**
+ * N.B. THIS FILE WAS THE INITIAL PROTOTYPE. I am keeping it here until all the
+ * issues in the rest of the code have been ironed out.
+ * 
  * 
  * This quick program will take a set of background images, and a set of
  * foreground images, and remove the background from the foreground images,

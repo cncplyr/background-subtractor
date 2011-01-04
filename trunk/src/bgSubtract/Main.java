@@ -6,6 +6,12 @@ import java.awt.image.BufferedImage;
 
 import fileHandling.FileHandler;
 
+/**
+ * This is the main entry point to the program.
+ * 
+ * @author Ric
+ * 
+ */
 public class Main {
 	private static FileHandler fileHandler;
 	private static BackgroundCreator backgroundCreator;
@@ -30,9 +36,9 @@ public class Main {
 		for (String name : imageNames) {
 			try {
 				BufferedImage currentImage = fileHandler.loadImage(name);
-				
-				
-				
+
+
+
 				BufferedImage subtractedImage = imageSubtractor.subtractBackground(currentImage);
 				fileHandler.saveImage(subtractedImage, name);
 			} catch (Exception e) {
