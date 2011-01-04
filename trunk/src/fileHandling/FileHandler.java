@@ -12,7 +12,7 @@ import javax.imageio.ImageIO;
 /**
  * 
  * @author cncplyr
- * @version 0.1
+ * @version 0.15
  * 
  */
 public class FileHandler {
@@ -65,7 +65,6 @@ public class FileHandler {
 		BufferedImage img = null;
 		try {
 			img = ImageIO.read(new File(inputFolder + File.separator + filename));
-			img = stupidWorkAroundForJavaException(img);
 		} catch (IOException e) {
 			System.out.println("File not found! " + filename);
 			e.printStackTrace();
@@ -82,7 +81,7 @@ public class FileHandler {
 	public BufferedImage loadImageFromFile(File file) {
 		BufferedImage img = null;
 		try {
-			img = stupidWorkAroundForJavaException(ImageIO.read(file));
+			img = ImageIO.read(file);
 		} catch (IOException e) {
 			System.out.println("File is not an image!");
 			e.printStackTrace();
@@ -98,15 +97,15 @@ public class FileHandler {
 				return name.startsWith(nameFilter);
 			}
 		};
-	
+
 		List<BufferedImage> images = new ArrayList<BufferedImage>();
-	
+
 		File[] files = folder.listFiles(filter);
-		
+
 		for (File eachFile : files) {
 			images.add(loadImageFromFile(eachFile));
 		}
-	
+
 		return images;
 	}
 
@@ -156,33 +155,5 @@ public class FileHandler {
 
 	public void setFileFormat(String fileFormat) {
 		this.fileFormat = fileFormat;
-	}
-
-	/**
-	 * A completely stupid retarded work-around for a completely stupid retarded
-	 * java exception. If you take a Buffered Image through ImageIO.read(new
-	 * File("filename.jpg")), then pass that to ConvolveOp, it throws an error:
-	 * 
-	 * Exception in thread "main" java.awt.image.ImagingOpException: Unable to
-	 * convolve src image at java.awt.image.ConvolveOp.filter(Unknown Source) at
-	 * bgSubtract.BgSubtract.averageBlur(BgSubtract.java:159) at
-	 * bgSubtract.BgSubtract.main(BgSubtract.java:74)
-	 * 
-	 * By copying it elem by elem to a new image, it suddenly works! Magic!!
-	 * 
-	 * Bug has been around for years:
-	 * http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4957775
-	 * 
-	 * @param input
-	 * @return
-	 */
-	public static BufferedImage stupidWorkAroundForJavaException(BufferedImage input) {
-		BufferedImage tmp = new BufferedImage(input.getWidth(), input.getHeight(), BufferedImage.TYPE_INT_ARGB);
-		for (int x = 0; x < input.getWidth(); x++) {
-			for (int y = 0; y < input.getHeight(); y++) {
-				tmp.setRGB(x, y, input.getRGB(x, y));
-			}
-		}
-		return tmp;
 	}
 }
