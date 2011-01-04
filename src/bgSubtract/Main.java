@@ -30,20 +30,21 @@ public class Main {
 			e.printStackTrace();
 		}
 
+		System.out.println("Subtracting background: ");
 		fileHandler.setInputFolder("input");
 		fileHandler.setOutputFolder("outputTEST");
 		String[] imageNames = fileHandler.loadAllFileNamesMatching(fileName);
 		for (String name : imageNames) {
+			System.out.print(name);
 			try {
 				BufferedImage currentImage = fileHandler.loadImage(name);
-
-
-
 				BufferedImage subtractedImage = imageSubtractor.subtractBackground(currentImage);
 				fileHandler.saveImage(subtractedImage, name);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
+			System.out.println("\tDone!");
 		}
+		System.exit(0);
 	}
 }
