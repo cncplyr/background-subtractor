@@ -134,7 +134,7 @@ public class ImageCombiner {
 		returnImage.setRGB(width, 0, width, height, inputImages.get(1).getRGB(0, 0, width, height, null, 0, width), 0, width);
 		returnImage.setRGB(0, height, width, height, inputImages.get(2).getRGB(0, 0, width, height, null, 0, width), 0, width);
 		returnImage.setRGB(width, height, width, height, inputImages.get(3).getRGB(0, 0, width, height, null, 0, width), 0, width);
-	
+
 		return returnImage;
 	}
 
@@ -232,9 +232,13 @@ public class ImageCombiner {
 			images.remove(noOfImages - 1);
 		}
 
+		// N.B. this is actually doing vertical lines, not horizontal lines
+		// (I think)
 		for (int x = 0; x < width; x++) {
+			if ((x) % 128 == 0) {
+				System.out.println((x / 128) + "0%");
+			}
 			for (int y = 0; y < height; y++) {
-				System.out.println(x + ", " + y);
 				for (BufferedImage image : images) {
 					currentPixel.add(image.getRGB(x, y));
 				}

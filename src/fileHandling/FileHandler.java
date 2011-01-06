@@ -10,32 +10,40 @@ import java.util.List;
 import javax.imageio.ImageIO;
 
 /**
+ * This class handles all file manipulation. Images are requested via
+ * <code>String</code> filters, and images are returned as either a
+ * <code>BufferedImage</code>, or a <code>List</code> of
+ * <code>BufferedImage</code>s.
+ * 
+ * Images can be loaded in any format allowed by ImageIO, but all saved images
+ * will be in the .png format.
+ * 
+ * It is possible to change the input and output folders using the
+ * inputFolder/outputFolder getters and setters.
  * 
  * @author cncplyr
- * @version 0.15
+ * @version 0.2
  * 
  */
 public class FileHandler {
 	private String inputFolder = "input";
 	private String outputFolder = "output";
 	private String fileFormat = "png";
+	private File inFolder;
 
 	public FileHandler() {
+		inFolder = new File(inputFolder);
 	}
 
 	/**
-	 * Gets all the files in a the input folder, where the beginning of the
-	 * files start with the name filter. E.g. nameFilter = "test", it will
-	 * return all the file names matching test*.
-	 * 
-	 * If no name filter is used, returns all contents of the folder.
+	 * Returns the number of files matching the filter. E.g. nameFilter =
+	 * "test", it will return how many file names match "test*".
 	 * 
 	 * @param nameFilter
 	 *            The beginning of the name to find.
-	 * @return A list of matching file names.
+	 * @return The total number of files matching the input string.
 	 */
-	public String[] loadAllFileNamesMatching(final String nameFilter) {
-		File folder = new File(inputFolder);
+	public int getTotalImagesMatching(final String nameFilter) {
 		FilenameFilter filter = null;
 
 		// Returns all files in the folder if (nameFilter == null)
@@ -47,50 +55,24 @@ public class FileHandler {
 				}
 			};
 		}
-		return folder.list(filter);
+
+		return inFolder.list(filter).length;
 	}
 
 	/**
-	 * Loads an image file into a BufferedImage. Includes
-	 * stupidWorkAroundForJavaException().
+	 * Loads all images from the input folder that match the name filter,
+	 * returned as a <code>List<code> of <code>BufferedImage</code>s. Allows
+	 * skipping of images.
 	 * 
-	 * @param filename
-	 *            The name of the image to load.
-	 * @param fileFormat
-	 *            The file format of the image to load.
-	 * @return The image in bufferedImage form.
-	 * @throws Exception
+	 * @param nameFilter
+	 *            The beginning of the name to find.
+	 * @param getEveryXthItem
+	 *            e.g. 1 = load every image; 2 = load every second image; 10 =
+	 *            load every 10th image.
+	 * @return All the files that matched the name, not including files skipped.
 	 */
-	public BufferedImage loadImage(String filename) throws Exception {
-		BufferedImage img = null;
-		try {
-			img = ImageIO.read(new File(inputFolder + File.separator + filename));
-		} catch (IOException e) {
-			System.out.println("File not found! " + filename);
-			e.printStackTrace();
-		}
-
-		// Check if method worked before returning.
-		if (img == null) {
-			throw new Exception("File failed to load!");
-		}
-
-		return img;
-	}
-
-	public BufferedImage loadImageFromFile(File file) {
-		BufferedImage img = null;
-		try {
-			img = ImageIO.read(file);
-		} catch (IOException e) {
-			System.out.println("File is not an image!");
-			e.printStackTrace();
-		}
-		return img;
-	}
-
-	public List<BufferedImage> loadAllImagesMatching(final String nameFilter) {
-		File folder = new File(inputFolder);
+	public List<BufferedImage> loadAllImagesMatching(final String nameFilter, int getEveryXthItem) {
+		int counter = 0;
 		FilenameFilter filter = new FilenameFilter() {
 			@Override
 			public boolean accept(File folder, String name) {
@@ -100,17 +82,46 @@ public class FileHandler {
 
 		List<BufferedImage> images = new ArrayList<BufferedImage>();
 
-		File[] files = folder.listFiles(filter);
-
-		for (File eachFile : files) {
-			images.add(loadImageFromFile(eachFile));
+		/* Solution 1 */
+		for (String eachName : inFolder.list(filter)) {
+			if (counter % getEveryXthItem == 0) {
+				images.add(loadImage(eachName));
+			}
+			counter++;
 		}
 
+		/* Alternate Solution */
+		// File[] files = folder.listFiles(filter);
+		//
+		// for (File eachFile : files) {
+		// images.add(loadImageFromFile(eachFile));
+		// }
 		return images;
 	}
 
 	/**
-	 * Saves a Buffered Image with the given file name.
+	 * Loads an image file from the input folder into a
+	 * <code>BufferedImage</code>.
+	 * 
+	 * @param filename
+	 *            The name of the image to load.
+	 * @param fileFormat
+	 *            The file format of the image to load.
+	 * @return The image in bufferedImage form.
+	 */
+	public BufferedImage loadImage(String filename) {
+		BufferedImage img = null;
+		try {
+			img = ImageIO.read(new File(inputFolder + File.separator + filename));
+		} catch (IOException e) {
+			System.out.println("Image not found: " + filename);
+			e.printStackTrace();
+		}
+		return img;
+	}
+
+	/**
+	 * Saves a Buffered Image as a .png with the given file name.
 	 * 
 	 * @param img
 	 *            The BufferedImage to save.
