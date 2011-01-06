@@ -23,8 +23,11 @@ public class ImageSubtractor {
 	}
 
 	public void setBackgroundImage(BufferedImage inputImage) {
-		this.backgroundImage = inputImage;
-		System.out.println("Background Image Updated!");
+		if (inputImage == null) {
+			throw new IllegalArgumentException("Background image is null!");
+		} else {
+			this.backgroundImage = inputImage;
+		}
 	}
 
 	public void setThreshold(int inputThreshold) {

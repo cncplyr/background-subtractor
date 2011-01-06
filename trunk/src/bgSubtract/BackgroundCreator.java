@@ -39,39 +39,38 @@ public class BackgroundCreator {
 	 * @throws Exception
 	 */
 	public BufferedImage createBackground() throws Exception {
+		System.out.println("----------------------");
 		System.out.println("Creating Background...");
-		Long startTime = System.nanoTime();
-
+		System.out.println("----------------------");
+		Long startTime = System.currentTimeMillis();
+		/* Setup */
 		fileHandler.setInputFolder("input");
-		fileHandler.setOutputFolder("outputTEST");
-		String[] imageNames = fileHandler.loadAllFileNamesMatching(fileName);
-		int noOfImages = imageNames.length;
+		fileHandler.setOutputFolder("output");
 		List<BufferedImage> images = new ArrayList<BufferedImage>();
 
+		/* Get Images */
+		System.out.print("Loading Images...");
+		int noOfImages = fileHandler.getTotalImagesMatching(fileName);
 		if (noOfImages < 1) {
+			/* No images found */
 			throw new Exception("Could not find any images!");
+		} else if (noOfImages < 300) {
+			/* Acceptable number of images for RAM */
+			images = fileHandler.loadAllImagesMatching(fileName, 1);
+		} else {
+			/* Take 10% of the images to save RAM */
+			int tenPercent = noOfImages / 10;
+			images = fileHandler.loadAllImagesMatching(fileName, tenPercent);
 		}
+		long loadImagesTime = System.currentTimeMillis();
+		System.out.println("\tDone!\nCompleted in " + (loadImagesTime - startTime) + "ms");
 
-		/* Take 1/10, 1/20 or 1/30 of the images to save RAM */
-		if (noOfImages < 200) {
-			images = fileHandler.loadAllImagesMatching(fileName);
-		} else if ((noOfImages >= 200) && (noOfImages < 1500)) {
-			for (int i = 0; i < noOfImages; i = i + 10) {
-				images.add(fileHandler.loadImage(imageNames[i]));
-			}
-		} else if ((noOfImages >= 1500) && (noOfImages < 3000)) {
-			for (int i = 0; i < noOfImages; i = i + 20) {
-				images.add(fileHandler.loadImage(imageNames[i]));
-			}
-		} else if (noOfImages >= 3000) {
-			for (int i = 0; i < noOfImages; i = i + 30) {
-				images.add(fileHandler.loadImage(imageNames[i]));
-			}
-		}
 
-		BufferedImage returnImage = imageCombiner.averageMedianImages(images);
-		/* End 10ths 20ths or 30ths */
-	
+		/* Combine Images */
+		System.out.println("Combining Images...");
+		BufferedImage backgroundImage = imageCombiner.averageMedianImages(images);
+		long combineImagesTime = System.currentTimeMillis();
+		System.out.println("100%\tDone!\nCompleted in " + (combineImagesTime - loadImagesTime) + "ms");
 
 		// /* Divide into any number of subdivisions */
 		// BufferedImage tmp = fileHandler.loadImage(imageNames[0]);
@@ -166,10 +165,11 @@ public class BackgroundCreator {
 		// imageCombiner.combineImageQuarters(fileHandler.getAllImagesMatching("bgImage"));
 		// /* End Divide into quarters */
 
-
-//		returnImage = imageBlur.averageBlur(returnImage, 11);
-		System.out.println("Created! Time Taken: " + ((System.nanoTime() - startTime) / 1000000000) + " secs");
-		fileHandler.saveImage(returnImage, "backgroundImage");
-		return returnImage;
+		/* Save Image and return */
+		System.out.println("----------------------");
+		System.out.println("Background Created in " + (combineImagesTime - startTime) + "ms");
+		System.out.println("----------------------");
+		fileHandler.saveImage(backgroundImage, "backgroundImage");
+		return backgroundImage;
 	}
 }
