@@ -123,11 +123,7 @@ public class FileHandler {
 		File saveFile = new File(outputFolder + File.separator + name + "." + fileFormat);
 
 		try {
-			if (fileFormat.equals("jpg")) {
-				ImageIO.write(img, "jpg", saveFile);
-			} else if (fileFormat.equals("png")) {
-				ImageIO.write(img, "png", saveFile);
-			}
+			ImageIO.write(img, "png", saveFile);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -141,19 +137,11 @@ public class FileHandler {
 		return outputFolder;
 	}
 
-	public String getFileFormat() {
-		return fileFormat;
-	}
-
 	public void setInputFolder(String inputFolder) {
 		this.inputFolder = inputFolder;
 	}
 
 	public void setOutputFolder(String outputFolder) {
 		this.outputFolder = outputFolder;
-	}
-
-	public void setFileFormat(String fileFormat) {
-		this.fileFormat = fileFormat;
 	}
 }
