@@ -1,6 +1,5 @@
 package bgSubtract;
 
-import imageProcessing.ImageBlurrer;
 import imageProcessing.ImageCombiner;
 
 import java.awt.image.BufferedImage;
@@ -13,11 +12,10 @@ import fileHandling.FileHandler;
  * Creates a background image by taking averages of all images.
  * 
  * @author cncplyr
- * @version 0.003
+ * @version 0.004
  */
 public class BackgroundCreator {
 	private static FileHandler fileHandler;
-	private static ImageBlurrer imageBlur;
 	private static ImageCombiner imageCombiner;
 
 	private static String fileName = "image";
@@ -28,7 +26,6 @@ public class BackgroundCreator {
 	 */
 	public BackgroundCreator() {
 		fileHandler = new FileHandler();
-		imageBlur = new ImageBlurrer();
 		imageCombiner = new ImageCombiner();
 	}
 
@@ -43,8 +40,9 @@ public class BackgroundCreator {
 		System.out.println("Creating Background...");
 		System.out.println("----------------------");
 		Long startTime = System.currentTimeMillis();
+		
 		/* Setup */
-		fileHandler.setInputFolder("input");
+		fileHandler.setInputFolder("inputbg");
 		fileHandler.setOutputFolder("output");
 		List<BufferedImage> images = new ArrayList<BufferedImage>();
 
