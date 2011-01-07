@@ -29,10 +29,8 @@ public class FileHandler {
 	private String inputFolder = "input";
 	private String outputFolder = "output";
 	private String fileFormat = "png";
-	private File inFolder;
 
 	public FileHandler() {
-		inFolder = new File(inputFolder);
 	}
 
 	/**
@@ -44,6 +42,7 @@ public class FileHandler {
 	 * @return The total number of files matching the input string.
 	 */
 	public int getTotalImagesMatching(final String nameFilter) {
+		File inFolder = new File(inputFolder);
 		FilenameFilter filter = null;
 
 		// Returns all files in the folder if (nameFilter == null)
@@ -72,6 +71,7 @@ public class FileHandler {
 	 * @return All the files that matched the name, not including files skipped.
 	 */
 	public List<BufferedImage> loadAllImagesMatching(final String nameFilter, int getEveryXthItem) {
+		File inFolder = new File(inputFolder);
 		int counter = 0;
 		FilenameFilter filter = new FilenameFilter() {
 			@Override
@@ -99,6 +99,18 @@ public class FileHandler {
 		return images;
 	}
 
+	public BufferedImage getNextImage(){
+		BufferedImage nextImage = loadImage("test");
+		return nextImage;
+	}
+	
+	
+	public boolean isAnotherImage(){
+		
+		return false;
+	}
+	
+	
 	/**
 	 * Loads an image file from the input folder into a
 	 * <code>BufferedImage</code>.
@@ -150,6 +162,7 @@ public class FileHandler {
 
 	public void setInputFolder(String inputFolder) {
 		this.inputFolder = inputFolder;
+		System.out.println("Input folder changed to: " + inputFolder);
 	}
 
 	public void setOutputFolder(String outputFolder) {

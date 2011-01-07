@@ -1,3 +1,25 @@
+// From FileHandler.java
+	/**
+	 * Loads a file as a BufferedImage.
+	 * 
+	 * @param file
+	 *            The file we want to change to a <code>BufferedImage</code>.
+	 * @return
+	 */
+	private BufferedImage loadImageFromFile(File file) {
+		BufferedImage img = null;
+		try {
+			img = ImageIO.read(file);
+		} catch (IOException e) {
+			System.out.println("File is not an image!");
+			e.printStackTrace();
+		}
+		return img;
+	}
+// End FileHandler.Java
+
+
+
 
 /// START MEAN Pairs code ///
 		/* Calculates using mean values */

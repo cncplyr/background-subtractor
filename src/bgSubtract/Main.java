@@ -10,23 +10,19 @@ import fileHandling.FileHandler;
 /**
  * This is the main entry point to the program.
  * 
- * @author Ric
+ * @author cncplyr
  * 
  */
 public class Main {
-	private static FileHandler fileHandler;
 	private static BackgroundCreator backgroundCreator;
-	private static ImageBlurrer imageBlur;
-	private static ImageSubtractor imageSubtractor;
-	private static String fileName = "image";
+	private static BackgroundSubtractor backgroundSubtractor;
 
 	public static void main(String[] args) {
 		backgroundCreator = new BackgroundCreator();
-		fileHandler = new FileHandler();
-		imageBlur = new ImageBlurrer();
-		imageSubtractor = new ImageSubtractor(1280, 720, 10);
+		backgroundSubtractor = new BackgroundSubtractor();
 
 		// /* Blur Test */
+		// imageBlur = new ImageBlurrer();
 		// fileHandler.setInputFolder("input");
 		// fileHandler.setOutputFolder("output");
 		// try {
@@ -46,28 +42,14 @@ public class Main {
 		/* Create Background */
 		try {
 			BufferedImage background = backgroundCreator.createBackground();
-			imageSubtractor.setBackgroundImage(background);
+			backgroundSubtractor.setBackgroundImage(background);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
 		/* Subtract background from each image */
-		// System.out.println("Subtracting background: ");
-		// fileHandler.setInputFolder("input");
-		// fileHandler.setOutputFolder("outputTEST");
-		// String[] imageNames = fileHandler.loadAllFileNamesMatching(fileName);
-		// for (String name : imageNames) {
-		// System.out.print(name);
-		// try {
-		// BufferedImage currentImage = fileHandler.loadImage(name);
-		// BufferedImage subtractedImage =
-		// imageSubtractor.subtractBackground(currentImage);
-		// fileHandler.saveImage(subtractedImage, name);
-		// } catch (Exception e) {
-		// e.printStackTrace();
-		// }
-		// System.out.println("\tDone!");
-		// }
+		backgroundSubtractor.subtractAll();
+
 		System.exit(0);
 	}
 }
