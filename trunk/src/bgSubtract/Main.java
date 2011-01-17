@@ -48,7 +48,7 @@ public class Main {
 		}
 
 		/* Subtract background from each image */
-		backgroundSubtractor.subtractAll();
+//		backgroundSubtractor.subtractAll();
 
 		System.exit(0);
 	}
