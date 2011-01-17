@@ -43,7 +43,7 @@ public class BackgroundCreator {
 		
 		/* Setup */
 		fileHandler.setInputFolder("inputbg");
-		fileHandler.setOutputFolder("output");
+		fileHandler.setOutputFolder("input");
 		List<BufferedImage> images = new ArrayList<BufferedImage>();
 
 		/* Get Images */
