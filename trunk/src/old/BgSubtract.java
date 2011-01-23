@@ -1,4 +1,4 @@
-package bgSubtract;
+package old;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
@@ -12,6 +12,8 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 /**
+ * N.B. THIS FILE WAS THE INITIAL PROTOTYPE. I am keeping it here until all the
+ * issues in the rest of the code have been ironed out.
  * 
  * 
  * This quick program will take a set of background images, and a set of
@@ -29,8 +31,8 @@ import javax.imageio.ImageIO;
  * @version 1.0
  * 
  */
-public class BackgroundSubtractor2 {
-	private static int threshold = 20;
+public class BgSubtract {
+	private static int threshold = 10;
 	private static int blurRadius = 11; // must be odd
 	private static String fileFormat = "png";
 	private static String inputFolder = "input";
@@ -47,10 +49,12 @@ public class BackgroundSubtractor2 {
 		System.out.println("         Background Subtractor");
 		System.out.println("=======================================");
 
+		checkArguments(args);
+
 		// Create output folder
 		new File(outputFolder).mkdir();
 
-		bgImg = averageBlur(loadImage("backgroundImage." + fileFormat), blurRadius);
+		createBackgroundImage();
 		removeAllBackgrounds();
 
 		System.out.println("\nComplete!");
@@ -70,12 +74,92 @@ public class BackgroundSubtractor2 {
 		System.exit(0);
 	}
 
+	private static void checkArguments(String[] args) {
+		for (int i = 0; i < args.length; i++) {
+			if (i + 1 < args.length) {
+				if (args[i].equals("-format")) {
+					// image format
+					if (args[i + 1].equals("png")) {
+						fileFormat = "png";
+					} else {
+						fileFormat = "jpg";
+					}
+				} else if (args[i].equals("-inFolder")) {
+					// input folder
+					inputFolder = args[i + 1];
+				} else if (args[i].equals("-outFolder")) {
+					// output folder
+					outputFolder = args[i + 1];
+				} else if (args[i].equals("-threshold")) {
+					threshold = Integer.parseInt(args[i + 1]);
+				} else if (args[i].equals("-blurRadius")) {
+					blurRadius = Integer.parseInt(args[i + 1]);
+				} else if (args[i].equals("--help")) {
+					printHelpMessage();
+				}
+			}
+		}
+	}
+
+	private static void createBackgroundImage() throws Exception {
+		System.out.println("Creating background...");
+
+		String[] bgImageNames = getAllFileNamesMatching("background");
+		if (bgImageNames.length < 1) {
+			printHelpMessage();
+			exitProgram();
+		} else {
+			System.out.print(bgImageNames[0]);
+			bgImg = averageBlur(loadImage(bgImageNames[0]), blurRadius);
+			System.out.println("\tDone!");
+			for (int i = 1; i < bgImageNames.length; i++) {
+				System.out.print(bgImageNames[i]);
+				combineTwoImages(bgImg, averageBlur(loadImage(bgImageNames[i]), blurRadius));
+				System.out.println("\tDone!");
+				System.gc();
+			}
+		}
+		saveImage(bgImg, "newBackground");
+		System.out.println("Background created!\n");
+	}
+
+	/**
+	 * Combines two images into the first image (average).
+	 * 
+	 * @param firstImage
+	 * @param additionalImage
+	 */
+	private static void combineTwoImages(BufferedImage firstImage, BufferedImage additionalImage) {
+		int height = firstImage.getHeight();
+		int width = firstImage.getWidth();
+
+		int red = 0;
+		int green = 0;
+		int blue = 0;
+
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				Color firstColour = new Color(firstImage.getRGB(x, y));
+				Color secondColour = new Color(additionalImage.getRGB(x, y));
+
+				red = (firstColour.getRed() + secondColour.getRed()) / 2;
+				green = (firstColour.getGreen() + secondColour.getGreen()) / 2;
+				blue = (firstColour.getBlue() + secondColour.getBlue()) / 2;
+
+				Color temp = new Color(red, green, blue, 255);
+
+				firstImage.setRGB(x, y, temp.getRGB());
+			}
+		}
+	}
+
 	private static void removeAllBackgrounds() throws Exception {
 		System.out.println("Removing backgrounds...");
 		int counter = 0;
 
 		String[] fgImageNames = getAllFileNamesMatching("image");
 		if (fgImageNames.length < 1) {
+			printHelpMessage();
 			exitProgram();
 		} else {
 			for (String currentName : fgImageNames) {
@@ -218,7 +302,11 @@ public class BackgroundSubtractor2 {
 		File saveFile = new File(outputFolder + File.separator + name + "." + fileFormat);
 
 		try {
-			ImageIO.write(img, "png", saveFile);
+			if (fileFormat.equals("jpg")) {
+				ImageIO.write(img, "jpg", saveFile);
+			} else if (fileFormat.equals("png")) {
+				ImageIO.write(img, "png", saveFile);
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -249,6 +337,30 @@ public class BackgroundSubtractor2 {
 		return name;
 	}
 
+	private static void printHelpMessage() {
+		System.out.println("README");
+		System.out.println("=============");
+		System.out
+				.println("This program will take a set of background images, and a set of foreground images, and remove the background from the foreground images, leaving transparent alpha behind.");
+		System.out.println("If the input image files are not in the correct place, or referenced properly, the program will fail. You have been warned!");
+		System.out.println("=============");
+		System.out.println("USAGE:");
+		System.out
+				.println("Background images must be called \"backgroundxxxxx.png\" where xxxxx is the id number, starting from 00000, with 5 digits total (leading zeros).");
+		System.out
+				.println("Foreground images must be called \"imagexxxxx.png\" where xxxxx is the id number, starting from 00000, with 5 digits total (leading zeros).");
+		System.out.println("All input images must be in a subfolder called \"input\", unless modified.");
+		System.out.println("All output images will be placed in a subfolder called \"output\", unless modified.");
+		System.out.println("=============");
+		System.out.println("Argument\tEffect");
+		System.out.println("-outFormat\tImage Output format: png OR jpg");
+		System.out.println("-inFolder\tImage Input folder override");
+		System.out.println("-outFolder\tImage Output folder override");
+		System.out.println("-threshold\tThreshold of colours for subtraction");
+		System.out.println("-blurRadius\tRadius of Average Blur applied");
+		System.out.println("--help\t\tDisplays this message");
+		System.out.println("=============");
+	}
 
 	/**
 	 * A completely stupid retarded work-around for a completely stupid retarded
