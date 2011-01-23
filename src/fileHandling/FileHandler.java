@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.imageio.ImageIO;
@@ -29,6 +30,8 @@ public class FileHandler {
 	private String inputFolder = "input";
 	private String outputFolder = "output";
 	private String fileFormat = "png";
+	private int currentImage = 0;
+	private int totalImages = 0;
 
 	public FileHandler() {
 	}
@@ -55,7 +58,32 @@ public class FileHandler {
 			};
 		}
 
-		return inFolder.list(filter).length;
+		totalImages = inFolder.list(filter).length;
+		return totalImages;
+	}
+
+	/**
+	 * HERESEY!!! HOW CAN I HAVE THIS METHOD HERE?!?! Because I know no better
+	 * way of doing it...
+	 * 
+	 * @param nameFilter
+	 * @return
+	 */
+	public List<String> getAllImageNamesMatching(final String nameFilter) {
+		File inFolder = new File(inputFolder);
+		FilenameFilter filter = null;
+
+		// Returns all files in the folder if (nameFilter == null)
+		if (nameFilter != null) {
+			filter = new FilenameFilter() {
+				@Override
+				public boolean accept(File folder, String name) {
+					return name.startsWith(nameFilter);
+				}
+			};
+		}
+
+		return Arrays.asList(inFolder.list(filter));
 	}
 
 	/**
@@ -99,18 +127,17 @@ public class FileHandler {
 		return images;
 	}
 
-	public BufferedImage getNextImage(){
+	public BufferedImage getNextImage() {
 		BufferedImage nextImage = loadImage("test");
 		return nextImage;
 	}
-	
-	
-	public boolean isAnotherImage(){
-		
-		return false;
+
+
+	public boolean isAnotherImage() {
+		return (currentImage < totalImages);
 	}
-	
-	
+
+
 	/**
 	 * Loads an image file from the input folder into a
 	 * <code>BufferedImage</code>.

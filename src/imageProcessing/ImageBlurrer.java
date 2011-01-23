@@ -39,7 +39,7 @@ public class ImageBlurrer {
 		float[] matrix = createAverageMatrix(size);
 
 		BufferedImage copiedImage = stupidWorkAroundForJavaException(img);
-		
+
 		BufferedImageOp averageBlurOp = new ConvolveOp(new Kernel(size, size, matrix));
 		// BufferedImageOp averageBlurOp = new ConvolveOp(new Kernel(size, size,
 		// matrix), ConvolveOp.EDGE_NO_OP, null);
@@ -99,12 +99,12 @@ public class ImageBlurrer {
 		int cells = size * size;
 		float[] matrix = new float[cells];
 
-		for (float cell : matrix) {
-			cell = 1.0f / (float) cells;
+		for (int i = 0; i < cells; i++) {
+			matrix[i] = 1.0f / (float) cells;
 		}
 		return matrix;
 	}
-	
+
 	/**
 	 * A completely stupid retarded work-around for a completely stupid retarded
 	 * java exception. If you take a Buffered Image through ImageIO.read(new

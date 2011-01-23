@@ -1,8 +1,10 @@
 package bgSubtract;
 
+import imageProcessing.BoundingBoxer;
 import imageProcessing.ImageSubtractor;
 
 import java.awt.image.BufferedImage;
+import java.util.List;
 
 import fileHandling.FileHandler;
 
@@ -14,30 +16,34 @@ import fileHandling.FileHandler;
  */
 public class BackgroundSubtractor {
 	private FileHandler fileHandler;
+	private BoundingBoxer boundingBoxer;
 	private ImageSubtractor imageSubtractor;
+	private int blurRadius;
 
 	public BackgroundSubtractor() {
 		fileHandler = new FileHandler();
-		imageSubtractor = new ImageSubtractor(1280, 720, 10);
+		boundingBoxer = new BoundingBoxer();
+		imageSubtractor = new ImageSubtractor(1280, 720, 20);
+		blurRadius = 11;
 	}
 
 	public void subtractAll() {
-		// TODO: Implement this
-//		System.out.println("Subtracting background: ");
-//		fileHandler.setInputFolder("input");
-//		fileHandler.setOutputFolder("output");
-//		String[] imageNames = fileHandler.loadAllFileNamesMatching(fileName);
-//		for (String name : imageNames) {
-//			System.out.print(name);
-//			try {
-//				BufferedImage currentImage = fileHandler.loadImage(name);
-//				BufferedImage subtractedImage = imageSubtractor.subtractBackground(currentImage);
-//				fileHandler.saveImage(subtractedImage, name);
-//			} catch (Exception e) {
-//				e.printStackTrace();
-//			}
-//			System.out.println("\tDone!");
-//		}
+		System.out.println("Subtracting background: ");
+		imageSubtractor.setBlurRadius(blurRadius);
+		fileHandler.setInputFolder("input");
+		fileHandler.setOutputFolder("output");
+		List<String> imageNames = fileHandler.getAllImageNamesMatching("image");
+		for (String name : imageNames) {
+			System.out.print(name);
+			try {
+				BufferedImage currentImage = fileHandler.loadImage(name);
+				BufferedImage subtractedImage = imageSubtractor.subtractBackground(currentImage);
+				fileHandler.saveImage(boundingBoxer.createBoundingBox(subtractedImage), name);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			System.out.println("\tDone!");
+		}
 	}
 
 	public void setBackgroundImage(BufferedImage inputImage) {
@@ -46,5 +52,13 @@ public class BackgroundSubtractor {
 		} else {
 			imageSubtractor.setBackgroundImage(inputImage);
 		}
+	}
+
+	public void setBlurRadius(int radius) {
+		blurRadius = radius;
+	}
+
+	public int getBlurRadius() {
+		return blurRadius;
 	}
 }

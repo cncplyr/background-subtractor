@@ -1,11 +1,9 @@
 package bgSubtract;
 
-import imageProcessing.ImageBlurrer;
-import imageProcessing.ImageSubtractor;
+import fileHandling.FileHandler;
+import imageProcessing.BoundingBoxer;
 
 import java.awt.image.BufferedImage;
-
-import fileHandling.FileHandler;
 
 /**
  * This is the main entry point to the program.
@@ -16,28 +14,12 @@ import fileHandling.FileHandler;
 public class Main {
 	private static BackgroundCreator backgroundCreator;
 	private static BackgroundSubtractor backgroundSubtractor;
+	private static BoundingBoxer boundingBoxer;
 
 	public static void main(String[] args) {
 		backgroundCreator = new BackgroundCreator();
 		backgroundSubtractor = new BackgroundSubtractor();
-
-		// /* Blur Test */
-		// imageBlur = new ImageBlurrer();
-		// fileHandler.setInputFolder("input");
-		// fileHandler.setOutputFolder("output");
-		// try {
-		// long startTime = System.currentTimeMillis();
-		// BufferedImage testImage = fileHandler.loadImage("image00038.png");
-		// long midTime = System.currentTimeMillis();
-		// System.out.println("Loaded image in " + (midTime - startTime) +
-		// "ms");
-		// fileHandler.saveImage(testImage, "blurOutput");
-		// long endTime = System.currentTimeMillis();
-		// System.out.println("Saved image in " + (endTime - midTime) + "ms");
-		// } catch (Exception e) {
-		// e.printStackTrace();
-		// }
-
+		boundingBoxer = new BoundingBoxer();
 
 		/* Create Background */
 		try {
@@ -48,7 +30,27 @@ public class Main {
 		}
 
 		/* Subtract background from each image */
-//		backgroundSubtractor.subtractAll();
+		backgroundSubtractor.subtractAll();
+
+
+		// /* Bounding Box Test */
+		// long time = System.currentTimeMillis();
+		// FileHandler fh = new FileHandler();
+		// fh.setInputFolder("output");
+		// fh.setOutputFolder("output");
+		// BufferedImage someImage = fh.loadImage("output00000.png");
+		// int[] testArray = boundingBoxer.getBoundingBox(someImage);
+		// fh.saveImage(boundingBoxer.drawBoundingBox(someImage, testArray),
+		// "boundingBoxText.png");
+		//
+		// System.out.println("Bounding Box: ");
+		// System.out.println("Start: (" + testArray[0] + ", " + testArray[1] +
+		// ")");
+		// System.out.println("End:   (" + testArray[2] + ", " + testArray[3] +
+		// ")");
+		// System.out.println("Time Taken: " + (System.currentTimeMillis() -
+		// time) + "ms");
+
 
 		System.exit(0);
 	}
