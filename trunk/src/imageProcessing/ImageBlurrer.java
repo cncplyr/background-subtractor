@@ -5,18 +5,14 @@ import java.awt.image.BufferedImageOp;
 import java.awt.image.ConvolveOp;
 import java.awt.image.Kernel;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-
-import fileHandling.FileHandler;
 
 import maths.AverageFinder;
 
 /**
- * TODO: This class doesn't work... null pointer exceptions...
  * 
  * @author cncplyr
- * @version 0.2
+ * @version 0.3
  * 
  */
 public class ImageBlurrer {
