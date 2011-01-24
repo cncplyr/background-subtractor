@@ -1,5 +1,7 @@
 #summary How to use the program
 
+NOTE: This file is out of date!!! - 24/1/2011
+
 = Introduction =
 
 This program will take a set of background images, and a set of foreground images, and remove the background from the foreground images, leaving transparent alpha behind.
