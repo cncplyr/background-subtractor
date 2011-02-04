@@ -13,6 +13,7 @@ import maths.AverageFinder;
  * Functions for combining images.
  * 
  * @author cncplyr
+ * @version 0.2
  * 
  */
 public class ImageCombiner {
