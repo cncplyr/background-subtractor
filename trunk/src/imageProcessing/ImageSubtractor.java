@@ -3,6 +3,12 @@ package imageProcessing;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 
+/**
+ * 
+ * @author cncplyr
+ * @version 0.2
+ *
+ */
 public class ImageSubtractor {
 	private ImageBlurrer imageBlur;
 	private BufferedImage backgroundImage;

@@ -1,13 +1,12 @@
 package bgSubtract;
 
-import imageProcessing.BoundingBoxer;
-
 import java.awt.image.BufferedImage;
 
 /**
  * This is the main entry point to the program.
  * 
  * @author cncplyr
+ * @version 0.2
  * 
  */
 public class Main {
@@ -17,7 +16,6 @@ public class Main {
 	public static void main(String[] args) {
 		backgroundCreator = new BackgroundCreator();
 		backgroundSubtractor = new BackgroundSubtractor();
-		new BoundingBoxer();
 
 		/* Create Background */
 		try {

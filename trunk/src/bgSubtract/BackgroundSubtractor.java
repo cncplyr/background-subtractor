@@ -1,6 +1,5 @@
 package bgSubtract;
 
-import imageProcessing.BoundingBoxer;
 import imageProcessing.ImageSubtractor;
 
 import java.awt.image.BufferedImage;
@@ -11,18 +10,16 @@ import fileHandling.FileHandler;
 /**
  * 
  * @author cncplyr
- * @version 0.1
+ * @version 0.2
  * 
  */
 public class BackgroundSubtractor {
 	private FileHandler fileHandler;
-	private BoundingBoxer boundingBoxer;
 	private ImageSubtractor imageSubtractor;
 	private int blurRadius;
 
 	public BackgroundSubtractor() {
 		fileHandler = new FileHandler();
-		boundingBoxer = new BoundingBoxer();
 		imageSubtractor = new ImageSubtractor(1280, 720, 20);
 		blurRadius = 11;
 	}
@@ -33,12 +30,13 @@ public class BackgroundSubtractor {
 		fileHandler.setInputFolder("input");
 		fileHandler.setOutputFolder("output");
 		List<String> imageNames = fileHandler.getAllImageNamesMatching("image");
+		int counter = 0;
 		for (String name : imageNames) {
 			System.out.print(name);
 			try {
 				BufferedImage currentImage = fileHandler.loadImage(name);
 				BufferedImage subtractedImage = imageSubtractor.subtractBackground(currentImage);
-				fileHandler.saveImage(boundingBoxer.createBoundingBox(subtractedImage), name);
+				fileHandler.saveImage(subtractedImage, formatFileName("outputImage", counter++));
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -60,5 +58,30 @@ public class BackgroundSubtractor {
 
 	public int getBlurRadius() {
 		return blurRadius;
+	}
+
+	/**
+	 * Take a name and an Id number, and appends them. Adds leading zeros to the
+	 * number to create a 5-digit number.
+	 * 
+	 * @param name
+	 *            The filename to use.
+	 * @param imageID
+	 *            The file ID number to use.
+	 * @return The complete name in the correct format.
+	 */
+	private static String formatFileName(String name, int imageID) {
+		if (imageID > 9999) {
+			name = name + Integer.toString(imageID);
+		} else if (imageID > 999) {
+			name = name + "0" + Integer.toString(imageID);
+		} else if (imageID > 99) {
+			name = name + "00" + Integer.toString(imageID);
+		} else if (imageID > 9) {
+			name = name + "000" + Integer.toString(imageID);
+		} else {
+			name = name + "0000" + Integer.toString(imageID);
+		}
+		return name;
 	}
 }
