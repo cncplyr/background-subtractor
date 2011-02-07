@@ -1,3 +1,39 @@
+// START From ImageSubtractor
+	// public BufferedImage subtractBackground(BufferedImage inputImage) {
+	// int width = inputImage.getWidth();
+	// int height = inputImage.getHeight();
+	//
+	// BufferedImage blurredInputImage = imageBlur.averageBlur(inputImage,
+	// blurRadius);
+	// BufferedImage newImage = new BufferedImage(width, height,
+	// BufferedImage.TYPE_INT_ARGB);
+	//
+	// for (int x = 0; x < width; x++) {
+	// for (int y = 0; y < height; y++) {
+	// Color bgColour = new Color(backgroundImage.getRGB(x, y));
+	// Color imgColour = new Color(blurredInputImage.getRGB(x, y));
+	//
+	// if ((imgColour.getRed() >= bgColour.getRed() - threshold &&
+	// imgColour.getRed() <= bgColour.getRed() + threshold)
+	// && (imgColour.getGreen() >= bgColour.getGreen() - threshold &&
+	// imgColour.getGreen() <= bgColour.getGreen() + threshold)
+	// && (imgColour.getBlue() >= bgColour.getBlue() - threshold &&
+	// imgColour.getBlue() <= bgColour.getBlue() + threshold)) {
+	// // if colours match, remove it
+	//
+	// newImage.setRGB(x, y, alpha.getRGB());
+	// } else {
+	// // else copy over
+	// newImage.setRGB(x, y, inputImage.getRGB(x, y));
+	// }
+	// }
+	// }
+	//
+	// return newImage;
+	// }
+// END From ImageSubtractor
+
+
 // From FileHandler.java
 	/**
 	 * Loads a file as a BufferedImage.
