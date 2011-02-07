@@ -1,45 +1,76 @@
 package imageProcessing;
 
-import java.awt.Color;
 import java.awt.image.BufferedImage;
 
 /**
  * 
  * @author cncplyr
- * @version 0.2
- *
+ * @version 0.3
+ * 
  */
 public class ImageSubtractor {
 	private ImageBlurrer imageBlur;
+	private ImageMasker imageMasker;
 	private BufferedImage backgroundImage;
-	private int threshold;
+
 	private int blurRadius;
-	private Color alpha = new Color(0, 0, 0, 0);
+	private int maskRadius;
+	private int threshold;
 
+	/**
+	 * Constructor. Initialises classes and integers needed.
+	 * 
+	 * @param width
+	 * @param height
+	 * @param threshold
+	 */
 	public ImageSubtractor(int width, int height, int threshold) {
-		this.blurRadius = 11;
-		this.threshold = threshold;
-
 		this.imageBlur = new ImageBlurrer();
+		this.imageMasker = new ImageMasker();
 		this.backgroundImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+
+		setBlurRadius(11);
+		setMaskRadius(2);
+		setThreshold(threshold);
+	}
+
+	/**
+	 * Subtracts the current background image from the given input image, using
+	 * a mask. Can also perform other operations on the mask, e.g.
+	 * contractExpand().
+	 * 
+	 * @param inputImage
+	 *            The image to subtract the background from.
+	 * @return The subtracted image.
+	 */
+	public BufferedImage subtractBackground(BufferedImage inputImage) {
+		BufferedImage mask = imageMasker.createMask(imageBlur.averageBlur(inputImage, blurRadius), backgroundImage, threshold);
+		mask = imageMasker.contractExpand(mask, getMaskRadius());
+		return imageMasker.applyMask(inputImage, mask);
 	}
 
 	public BufferedImage getBackgroundImage() {
 		return backgroundImage;
 	}
 
-	public int getThreshold() {
-		return threshold;
-	}
-
-	public void setBlurRadius(int radius) {
-		blurRadius = radius;
-	}
-
 	public int getBlurRadius() {
 		return blurRadius;
 	}
 
+	public int getMaskRadius() {
+		return maskRadius;
+	}
+
+	public int getThreshold() {
+		return threshold;
+	}
+
+	/**
+	 * Set the background image to use. Background image is blurred upon calling
+	 * this method automatically.
+	 * 
+	 * @param inputImage
+	 */
 	public void setBackgroundImage(BufferedImage inputImage) {
 		if (inputImage == null) {
 			throw new IllegalArgumentException("Background image is null!");
@@ -48,35 +79,25 @@ public class ImageSubtractor {
 		}
 	}
 
-	public void setThreshold(int inputThreshold) {
-		this.threshold = inputThreshold;
+	public void setBlurRadius(int radius) {
+		blurRadius = radius;
 	}
 
-	public BufferedImage subtractBackground(BufferedImage inputImage) {
-		int width = inputImage.getWidth();
-		int height = inputImage.getHeight();
+	public void setMaskRadius(int maskRadius) {
+		this.maskRadius = maskRadius;
+	}
 
-		BufferedImage blurredInputImage = imageBlur.averageBlur(inputImage, blurRadius);
-		BufferedImage newImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-
-		for (int x = 0; x < width; x++) {
-			for (int y = 0; y < height; y++) {
-				Color bgColour = new Color(backgroundImage.getRGB(x, y));
-				Color imgColour = new Color(blurredInputImage.getRGB(x, y));
-
-				if ((imgColour.getRed() >= bgColour.getRed() - threshold && imgColour.getRed() <= bgColour.getRed() + threshold)
-						&& (imgColour.getGreen() >= bgColour.getGreen() - threshold && imgColour.getGreen() <= bgColour.getGreen() + threshold)
-						&& (imgColour.getBlue() >= bgColour.getBlue() - threshold && imgColour.getBlue() <= bgColour.getBlue() + threshold)) {
-					// if colours match, remove it
-
-					newImage.setRGB(x, y, alpha.getRGB());
-				} else {
-					// else copy over
-					newImage.setRGB(x, y, inputImage.getRGB(x, y));
-				}
-			}
-		}
-
-		return newImage;
+	/**
+	 * Set the threshold for background subtraction. This sets the limits of the
+	 * colour comparison for judging whether a pixel in the input image matches
+	 * the background image. Typical value is 20. This is the threshold both
+	 * above and below, so threshold = 20 gives a variance of 40 in each of RGB
+	 * values.
+	 * 
+	 * @param inputThreshold
+	 *            The threshold to use.
+	 */
+	public void setThreshold(int inputThreshold) {
+		this.threshold = inputThreshold;
 	}
 }
