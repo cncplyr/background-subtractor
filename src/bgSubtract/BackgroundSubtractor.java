@@ -31,7 +31,9 @@ public class BackgroundSubtractor {
 		fileHandler.setOutputFolder("output");
 		List<String> imageNames = fileHandler.getAllImageNamesMatching("image");
 		int counter = 0;
+		long iStart;
 		for (String name : imageNames) {
+			iStart = System.currentTimeMillis();
 			System.out.print(name);
 			try {
 				BufferedImage currentImage = fileHandler.loadImage(name);
@@ -40,7 +42,7 @@ public class BackgroundSubtractor {
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			System.out.println("\tDone!");
+			System.out.println("\tDone! t=" + (System.currentTimeMillis() - iStart));
 		}
 	}
 

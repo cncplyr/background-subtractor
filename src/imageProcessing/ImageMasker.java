@@ -16,101 +16,35 @@ import java.util.List;
 public class ImageMasker {
 	private Color alpha = new Color(0, 0, 0, 0);
 	private Color black = new Color(255, 255, 255, 255);
+	private BoundingBoxer boundingBoxer;
 
-	/**
-	 * Contracts and expands a mask, to remove erroneous strands of pixels.
-	 * 
-	 * @param inputMask
-	 * @param times
-	 *            The number of times to contract/expand.
-	 * @return
-	 */
-	public BufferedImage contractExpand(BufferedImage inputMask, int times) {
-		// Contract the mask the required number of times
-		for (int i = 0; i < times; i++) {
-			inputMask = contractOne(inputMask);
-		}
-		// Expand the mask the required number of times
-		for (int i = 0; i < times; i++) {
-			inputMask = expandOne(inputMask);
-		}
-		return inputMask;
+	public ImageMasker() {
+		this.boundingBoxer = new BoundingBoxer();
 	}
 
 	/**
-	 * Takes a mask comprising of alpha and black levels, and contracts the mask
-	 * by 1 pixel.
+	 * Takes an image and a black/alpha mask, and applies the mask.
 	 * 
 	 * @param inputImage
+	 * @param mask
 	 * @return
 	 */
-	public BufferedImage contractOne(BufferedImage inputMask) {
-		int width = inputMask.getWidth();
-		int height = inputMask.getHeight();
-		BufferedImage finalMask = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+	public BufferedImage applyMask(BufferedImage inputImage, BufferedImage mask) {
+		int width = inputImage.getWidth();
+		int height = inputImage.getHeight();
+		BufferedImage maskedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
 
-		List<Integer> colourGrid;
-
-		/* Contract by one */
-		// For each pixel
-		for (int x = 1; x < width - 1; x++) {
-			for (int y = 1; y < height - 1; y++) {
-				if (inputMask.getRGB(x, y) == alpha.getRGB()) {
-					// if already alpha, ignore it
-					finalMask.setRGB(x, y, alpha.getRGB());
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				if (mask.getRGB(x, y) == black.getRGB()) {
+					maskedImage.setRGB(x, y, inputImage.getRGB(x, y));
 				} else {
-					// else this pixel has a colour
-					colourGrid = bruteForceColourGrid(inputMask, x, y);
-					if (colourGrid.contains(alpha.getRGB())) {
-						// if it is a border pixel, ignore it
-						finalMask.setRGB(x, y, alpha.getRGB());
-					} else {
-						// else add it to the mask
-						finalMask.setRGB(x, y, black.getRGB());
-					}
+					maskedImage.setRGB(x, y, alpha.getRGB());
 				}
 			}
 		}
 
-		return finalMask;
-	}
-
-	/**
-	 * Takes a mask comprising of alpha and black levels, and expands the mask
-	 * by 1 pixel.
-	 * 
-	 * @param inputMask
-	 * @return
-	 */
-	public BufferedImage expandOne(BufferedImage inputMask) {
-		int width = inputMask.getWidth();
-		int height = inputMask.getHeight();
-		BufferedImage finalMask = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-
-		List<Integer> colourGrid;
-
-		/* Expand by one */
-		// For each pixel
-		for (int x = 1; x < width - 1; x++) {
-			for (int y = 1; y < height - 1; y++) {
-				if (inputMask.getRGB(x, y) == black.getRGB()) {
-					// if already in mask, copy it
-					finalMask.setRGB(x, y, black.getRGB());
-				} else {
-					// else check pixel for bordering mask
-					colourGrid = bruteForceColourGrid(inputMask, x, y);
-					if (colourGrid.contains(black.getRGB())) {
-						// if it bordering, add to mask
-						finalMask.setRGB(x, y, black.getRGB());
-					} else {
-						// else ignore it
-						finalMask.setRGB(x, y, alpha.getRGB());
-					}
-				}
-			}
-		}
-
-		return finalMask;
+		return maskedImage;
 	}
 
 	/**
@@ -150,28 +84,113 @@ public class ImageMasker {
 	}
 
 	/**
-	 * Takes an image and a black/alpha mask, and applies the mask.
+	 * Contracts and expands a mask, to remove erroneous strands of pixels.
 	 * 
-	 * @param inputImage
-	 * @param mask
+	 * @param inputMask
+	 * @param times
+	 *            The number of times to contract/expand.
 	 * @return
 	 */
-	public BufferedImage applyMask(BufferedImage inputImage, BufferedImage mask) {
-		int width = inputImage.getWidth();
-		int height = inputImage.getHeight();
-		BufferedImage maskedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+	public BufferedImage contractExpand(BufferedImage inputMask, int times) {
+		int[] maskBoundingBox = boundingBoxer.getBoundingBox(inputMask);
+		// Contract the mask the required number of times
+		for (int i = 0; i < times; i++) {
+			inputMask = contractOne(inputMask, maskBoundingBox);
+		}
+		// Expand the mask the required number of times
+		for (int i = 0; i < times; i++) {
+			inputMask = expandOne(inputMask, maskBoundingBox);
+		}
+		return inputMask;
+	}
 
-		for (int x = 0; x < width; x++) {
-			for (int y = 0; y < height; y++) {
-				if (mask.getRGB(x, y) == black.getRGB()) {
-					maskedImage.setRGB(x, y, inputImage.getRGB(x, y));
+	/**
+	 * Takes a mask comprising of alpha and black levels, and contracts the mask
+	 * by 1 pixel.
+	 * 
+	 * @param inputImage
+	 * @return
+	 */
+	private BufferedImage contractOne(BufferedImage inputMask, int[] boundingBox) {
+		int width = inputMask.getWidth();
+		int height = inputMask.getHeight();
+		BufferedImage finalMask = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+		// Create local variables for the bounding box to keep the code neat
+		// here, and in case the type of boundingBox gets changed later.
+		int x1 = boundingBox[0];
+		int x2 = boundingBox[2];
+		int y1 = boundingBox[1];
+		int y2 = boundingBox[3];
+
+		List<Integer> colourGrid;
+
+		/* Contract by one */
+		// For each pixel
+		for (int x = x1; x < x2; x++) {
+			for (int y = y1; y < y2; y++) {
+				if (inputMask.getRGB(x, y) == alpha.getRGB()) {
+					// if already alpha, ignore it
+					finalMask.setRGB(x, y, alpha.getRGB());
 				} else {
-					maskedImage.setRGB(x, y, alpha.getRGB());
+					// else this pixel has a colour
+					colourGrid = bruteForceColourGrid(inputMask, x, y);
+					if (colourGrid.contains(alpha.getRGB())) {
+						// if it is a border pixel, ignore it
+						finalMask.setRGB(x, y, alpha.getRGB());
+					} else {
+						// else add it to the mask
+						finalMask.setRGB(x, y, black.getRGB());
+					}
 				}
 			}
 		}
 
-		return maskedImage;
+		return finalMask;
+	}
+
+	/**
+	 * Takes a mask comprising of alpha and black levels, and expands the mask
+	 * by 1 pixel.
+	 * 
+	 * @param inputMask
+	 * @return
+	 */
+	private BufferedImage expandOne(BufferedImage inputMask, int[] boundingBox) {
+		int width = inputMask.getWidth();
+		int height = inputMask.getHeight();
+		BufferedImage finalMask = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+		// Create local variables for the bounding box to keep the code neat
+		// here, and in case the type of boundingBox gets changed later.
+		int x1 = boundingBox[0];
+		int x2 = boundingBox[2];
+		int y1 = boundingBox[1];
+		int y2 = boundingBox[3];
+
+
+		List<Integer> colourGrid;
+
+		/* Expand by one */
+		// For each pixel
+		for (int x = x1; x < x2; x++) {
+			for (int y = y1; y < y2; y++) {
+				if (inputMask.getRGB(x, y) == black.getRGB()) {
+					// if already in mask, copy it
+					finalMask.setRGB(x, y, black.getRGB());
+				} else {
+					// else check pixel for bordering mask
+					colourGrid = bruteForceColourGrid(inputMask, x, y);
+					if (colourGrid.contains(black.getRGB())) {
+						// if it bordering, add to mask
+						finalMask.setRGB(x, y, black.getRGB());
+					} else {
+						// else ignore it
+						finalMask.setRGB(x, y, alpha.getRGB());
+					}
+				}
+			}
+		}
+
+		return finalMask;
 	}
 
 	/**
