@@ -1,4 +1,4 @@
-package old;
+package imageProcessing;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
