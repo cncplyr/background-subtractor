@@ -2,7 +2,7 @@ package imageProcessing;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -10,16 +10,14 @@ import java.util.List;
  * creating a smoother mask. Works only with masks.
  * 
  * @author cncplyr
- * @version 0.2
+ * @version 0.3
  * 
  */
 public class ImageMasker {
 	private Color alpha = new Color(0, 0, 0, 0);
 	private Color black = new Color(255, 255, 255, 255);
-	private BoundingBoxer boundingBoxer;
 
 	public ImageMasker() {
-		this.boundingBoxer = new BoundingBoxer();
 	}
 
 	/**
@@ -91,8 +89,7 @@ public class ImageMasker {
 	 *            The number of times to contract/expand.
 	 * @return
 	 */
-	public BufferedImage contractExpand(BufferedImage inputMask, int times) {
-		int[] maskBoundingBox = boundingBoxer.getBoundingBox(inputMask);
+	public BufferedImage contractExpand(BufferedImage inputMask, int[] maskBoundingBox, int times) {
 		// Contract the mask the required number of times
 		for (int i = 0; i < times; i++) {
 			inputMask = contractOne(inputMask, maskBoundingBox);
@@ -133,7 +130,7 @@ public class ImageMasker {
 					finalMask.setRGB(x, y, alpha.getRGB());
 				} else {
 					// else this pixel has a colour
-					colourGrid = bruteForceColourGrid(inputMask, x, y);
+					colourGrid = getLocalColoursAsList(inputMask, x, y);
 					if (colourGrid.contains(alpha.getRGB())) {
 						// if it is a border pixel, ignore it
 						finalMask.setRGB(x, y, alpha.getRGB());
@@ -178,7 +175,7 @@ public class ImageMasker {
 					finalMask.setRGB(x, y, black.getRGB());
 				} else {
 					// else check pixel for bordering mask
-					colourGrid = bruteForceColourGrid(inputMask, x, y);
+					colourGrid = getLocalColoursAsList(inputMask, x, y);
 					if (colourGrid.contains(black.getRGB())) {
 						// if it bordering, add to mask
 						finalMask.setRGB(x, y, black.getRGB());
@@ -194,28 +191,20 @@ public class ImageMasker {
 	}
 
 	/**
-	 * A brute force method of getting a colour grid, until I can find out how
-	 * getRGB() works properly.
-	 * 
-	 * TODO: Replace this method.
+	 * Returns the surrounding colours as a fixed-length list, enabling us to
+	 * call colourGrid.contains on the list. NOTE: The size of this list cannot
+	 * grow, nor should it in this class.
 	 * 
 	 * @param image
+	 *            The image to get the pixels from.
 	 * @param x
+	 *            The x-coordinate of the current centre pixel.
 	 * @param y
+	 *            The y-coordinate of the current centre pixel.
 	 * @return
 	 */
-	private List<Integer> bruteForceColourGrid(BufferedImage image, int x, int y) {
-		List<Integer> colourList = new ArrayList<Integer>();
-
-		colourList.add(image.getRGB(x - 1, y - 1));
-		colourList.add(image.getRGB(x, y - 1));
-		colourList.add(image.getRGB(x + 1, y - 1));
-		colourList.add(image.getRGB(x - 1, y));
-		colourList.add(image.getRGB(x + 1, y));
-		colourList.add(image.getRGB(x - 1, y + 1));
-		colourList.add(image.getRGB(x, y + 1));
-		colourList.add(image.getRGB(x + 1, y + 1));
-
-		return colourList;
+	private List<Integer> getLocalColoursAsList(BufferedImage image, int x, int y) {
+		List list = Arrays.asList(image.getRGB(x - 1, y - 1, 3, 3, null, 0, 3));
+		return list;
 	}
 }

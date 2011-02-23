@@ -9,7 +9,9 @@ import java.awt.image.BufferedImage;
  * 
  */
 public class ImageSubtractor {
+	private BoundingBoxer boundingBoxer;
 	private ImageBlurrer imageBlur;
+	private ImageCropper imageCrop;
 	private ImageMasker imageMasker;
 	private BufferedImage backgroundImage;
 
@@ -25,7 +27,9 @@ public class ImageSubtractor {
 	 * @param threshold
 	 */
 	public ImageSubtractor(int width, int height, int threshold) {
+		this.boundingBoxer = new BoundingBoxer();
 		this.imageBlur = new ImageBlurrer();
+		this.imageCrop = new ImageCropper();
 		this.imageMasker = new ImageMasker();
 		this.backgroundImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
 
@@ -45,8 +49,9 @@ public class ImageSubtractor {
 	 */
 	public BufferedImage subtractBackground(BufferedImage inputImage) {
 		BufferedImage mask = imageMasker.createMask(imageBlur.averageBlur(inputImage, blurRadius), backgroundImage, threshold);
-		mask = imageMasker.contractExpand(mask, getMaskRadius());
-		return imageMasker.applyMask(inputImage, mask);
+		int[] imageBBox = boundingBoxer.getBoundingBox(mask);
+		mask = imageMasker.contractExpand(mask, imageBBox, maskRadius);
+		return imageCrop.cropImage(imageMasker.applyMask(inputImage, mask), imageBBox);
 	}
 
 	public BufferedImage getBackgroundImage() {
