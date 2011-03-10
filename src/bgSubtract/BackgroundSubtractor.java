@@ -5,6 +5,7 @@ import imageProcessing.ImageSubtractor;
 import java.awt.image.BufferedImage;
 import java.util.List;
 
+import fileHandling.CSVHandler;
 import fileHandling.FileHandler;
 
 /**
@@ -16,15 +17,20 @@ import fileHandling.FileHandler;
 public class BackgroundSubtractor {
 	private FileHandler fileHandler;
 	private ImageSubtractor imageSubtractor;
+	private CSVHandler csvHandler;
 	private int blurRadius;
 
 	public BackgroundSubtractor() {
 		fileHandler = new FileHandler();
 		imageSubtractor = new ImageSubtractor(1280, 720, 20);
+		csvHandler = new CSVHandler();
 		blurRadius = 11;
 	}
 
 	public void subtractAll() {
+		System.out.print("Test CSV output...");
+		csvHandler.writeCSV(null);
+		System.out.println("Done!");
 		System.out.println("Subtracting background: ");
 		imageSubtractor.setBlurRadius(blurRadius);
 		fileHandler.setInputFolder("input");

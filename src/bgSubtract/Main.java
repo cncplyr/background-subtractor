@@ -19,7 +19,7 @@ public class Main {
 
 		createBackground();
 		subtractBackground();
-
+		
 		System.exit(0);
 	}
 
