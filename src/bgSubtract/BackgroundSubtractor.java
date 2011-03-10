@@ -3,7 +3,10 @@ package bgSubtract;
 import imageProcessing.ImageSubtractor;
 
 import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.List;
+
+import au.com.bytecode.opencsv.CSVWriter;
 
 import fileHandling.CSVHandler;
 import fileHandling.FileHandler;
@@ -22,22 +25,25 @@ public class BackgroundSubtractor {
 
 	public BackgroundSubtractor() {
 		fileHandler = new FileHandler();
-		imageSubtractor = new ImageSubtractor(1280, 720, 20);
 		csvHandler = new CSVHandler();
+		imageSubtractor = new ImageSubtractor(1280, 720, 20);
+		imageSubtractor.setCSVHandler(csvHandler);
 		blurRadius = 11;
 	}
 
 	public void subtractAll() {
-		System.out.print("Test CSV output...");
-		csvHandler.writeCSV(null);
-		System.out.println("Done!");
 		System.out.println("Subtracting background: ");
+		// Set up csv writer
+		csvHandler.openCSVStream();
+		// Set up file handling and image properties
 		imageSubtractor.setBlurRadius(blurRadius);
 		fileHandler.setInputFolder("input");
 		fileHandler.setOutputFolder("output");
+		// Get the list of file names
 		List<String> imageNames = fileHandler.getAllImageNamesMatching("image");
 		int counter = 0;
 		long iStart;
+		// Subtract each one
 		for (String name : imageNames) {
 			iStart = System.currentTimeMillis();
 			System.out.print(name);
@@ -50,6 +56,8 @@ public class BackgroundSubtractor {
 			}
 			System.out.println("\tDone! t=" + (System.currentTimeMillis() - iStart));
 		}
+		// Close csv writer
+		csvHandler.closeCSVStream();
 	}
 
 	public void setBackgroundImage(BufferedImage inputImage) {
