@@ -2,6 +2,9 @@ package imageProcessing;
 
 import java.awt.image.BufferedImage;
 
+import fileHandling.CSVHandler;
+
+
 /**
  * 
  * @author cncplyr
@@ -14,6 +17,7 @@ public class ImageSubtractor {
 	private ImageCropper imageCrop;
 	private ImageMasker imageMasker;
 	private BufferedImage backgroundImage;
+	private CSVHandler csvHandler;
 
 	private int blurRadius;
 	private int maskRadius;
@@ -50,6 +54,9 @@ public class ImageSubtractor {
 	public BufferedImage subtractBackground(BufferedImage inputImage) {
 		BufferedImage mask = imageMasker.createMask(imageBlur.averageBlur(inputImage, blurRadius), backgroundImage, threshold);
 		int[] imageBBox = boundingBoxer.getBoundingBox(mask);
+		if (csvHandler != null) {
+			csvHandler.writeCSVLine(imageBBox);
+		}
 		mask = imageMasker.contractExpand(mask, imageBBox, maskRadius);
 		return imageCrop.cropImage(imageMasker.applyMask(inputImage, mask), imageBBox);
 	}
@@ -104,5 +111,9 @@ public class ImageSubtractor {
 	 */
 	public void setThreshold(int inputThreshold) {
 		this.threshold = inputThreshold;
+	}
+
+	public void setCSVHandler(CSVHandler csvHandler) {
+		this.csvHandler = csvHandler;
 	}
 }
