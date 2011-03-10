@@ -43,10 +43,12 @@ public class CSVHandler {
 		CSVWriter writer;
 		try {
 			// creates a tab-separated file
-			writer = new CSVWriter(new FileWriter(csvFolder + File.separator + "boundingboxes.csv"), '\t');
+			writer = new CSVWriter(new FileWriter(csvFolder + File.separator + "boundingboxes.csv"), ',');
 			// feed in your array (or convert your data to an array)
 			String[] entries = "first#second#third".split("#");
 			writer.writeNext(entries);
+			String[] newEntries = new String[]{"512", "240"};
+			writer.writeNext(newEntries);
 			writer.close();
 		} catch (IOException e) {
 			e.printStackTrace();
