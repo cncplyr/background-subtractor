@@ -1,4 +1,4 @@
-package bgSubtract;
+package backgroundSubtractor;
 
 import java.awt.image.BufferedImage;
 
@@ -19,7 +19,7 @@ public class Main {
 
 		createBackground();
 		subtractBackground();
-		
+
 		System.exit(0);
 	}
 
@@ -43,5 +43,10 @@ public class Main {
 		backgroundSubtractor.subtractAll();
 	}
 
-
+	/**
+	 * Set up the GUI.
+	 */
+	public static void createGUI() {
+		
+	}
 }

@@ -23,14 +23,13 @@ import javax.imageio.ImageIO;
  * inputFolder/outputFolder getters and setters.
  * 
  * @author cncplyr
- * @version 0.2
+ * @version 0.3
  * 
  */
 public class FileHandler {
 	private String inputFolder = "input";
 	private String outputFolder = "output";
 	private String fileFormat = "png";
-	private int currentImage = 0;
 	private int totalImages = 0;
 
 	public FileHandler() {
@@ -63,11 +62,16 @@ public class FileHandler {
 	}
 
 	/**
-	 * HERESEY!!! HOW CAN I HAVE THIS METHOD HERE?!?! Because I know no better
-	 * way of doing it...
+	 * Returns a <code>List</code> of all images in the current input folder
+	 * that match the name filter. If loading from a different folder, must call
+	 * setInputFolder first.
+	 * 
+	 * E.g. nameFilter = "test", it will return how many file names match
+	 * "test*".
 	 * 
 	 * @param nameFilter
-	 * @return
+	 *            The name filter to use for searching for images.
+	 * @return A <code>List</code> of file names as <code>String</code>s.
 	 */
 	public List<String> getAllImageNamesMatching(final String nameFilter) {
 		File inFolder = new File(inputFolder);
@@ -118,7 +122,7 @@ public class FileHandler {
 			counter++;
 		}
 
-		/* Alternate Solution */
+		/* Solution 2 - (Slightly slower?) */
 		// File[] files = folder.listFiles(filter);
 		//
 		// for (File eachFile : files) {
@@ -127,26 +131,13 @@ public class FileHandler {
 		return images;
 	}
 
-	public BufferedImage getNextImage() {
-		BufferedImage nextImage = loadImage("test");
-		return nextImage;
-	}
-
-
-	public boolean isAnotherImage() {
-		return (currentImage < totalImages);
-	}
-
-
 	/**
 	 * Loads an image file from the input folder into a
 	 * <code>BufferedImage</code>.
 	 * 
 	 * @param filename
 	 *            The name of the image to load.
-	 * @param fileFormat
-	 *            The file format of the image to load.
-	 * @return The image in bufferedImage form.
+	 * @return The image in <code>BufferedImage</code> form.
 	 */
 	public BufferedImage loadImage(String filename) {
 		BufferedImage img = null;
@@ -160,10 +151,10 @@ public class FileHandler {
 	}
 
 	/**
-	 * Saves a Buffered Image as a .png with the given file name.
+	 * Saves a <code>BufferedImage</code> as a .png with the given file name.
 	 * 
 	 * @param img
-	 *            The BufferedImage to save.
+	 *            The <code>BufferedImage</code> to save.
 	 * @param name
 	 *            The file name to use.
 	 */
@@ -179,19 +170,41 @@ public class FileHandler {
 		}
 	}
 
+	/**
+	 * Returns the currently selected input folder.
+	 * 
+	 * @return The current input folder as a <code>String</code>
+	 */
 	public String getInputFolder() {
 		return inputFolder;
 	}
 
+	/**
+	 * Returns the currently selected output folder.
+	 * 
+	 * @return The current output folder as a <code>String</code>
+	 */
 	public String getOutputFolder() {
 		return outputFolder;
 	}
 
+	/**
+	 * Sets the input folder to use.
+	 * 
+	 * @param inputFolder
+	 *            The input folder to use.
+	 */
 	public void setInputFolder(String inputFolder) {
 		this.inputFolder = inputFolder;
 		System.out.println("Input folder changed to: " + inputFolder);
 	}
 
+	/**
+	 * Sets the output folder to use.
+	 * 
+	 * @param outputFolder
+	 *            The output folder to use.
+	 */
 	public void setOutputFolder(String outputFolder) {
 		this.outputFolder = outputFolder;
 	}
