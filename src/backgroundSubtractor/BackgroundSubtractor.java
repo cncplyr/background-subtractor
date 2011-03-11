@@ -1,12 +1,9 @@
-package bgSubtract;
+package backgroundSubtractor;
 
 import imageProcessing.ImageSubtractor;
 
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.util.List;
-
-import au.com.bytecode.opencsv.CSVWriter;
 
 import fileHandling.CSVHandler;
 import fileHandling.FileHandler;
@@ -14,7 +11,7 @@ import fileHandling.FileHandler;
 /**
  * 
  * @author cncplyr
- * @version 0.2
+ * @version 0.3
  * 
  */
 public class BackgroundSubtractor {
@@ -23,6 +20,9 @@ public class BackgroundSubtractor {
 	private CSVHandler csvHandler;
 	private int blurRadius;
 
+	/**
+	 * Constructor
+	 */
 	public BackgroundSubtractor() {
 		fileHandler = new FileHandler();
 		csvHandler = new CSVHandler();
@@ -31,6 +31,9 @@ public class BackgroundSubtractor {
 		blurRadius = 11;
 	}
 
+	/**
+	 * Subtract the background from all images. Uses parameter already set.
+	 */
 	public void subtractAll() {
 		System.out.println("Subtracting background: ");
 		// Set up csv writer
@@ -60,6 +63,21 @@ public class BackgroundSubtractor {
 		csvHandler.closeCSVStream();
 	}
 
+	/**
+	 * Get the current blur radius.
+	 * 
+	 * @return <code>int</code> blurRadius.
+	 */
+	public int getBlurRadius() {
+		return blurRadius;
+	}
+
+	/**
+	 * Sets the background image to use.
+	 * 
+	 * @param inputImage
+	 *            The background image to subtract.
+	 */
 	public void setBackgroundImage(BufferedImage inputImage) {
 		if (inputImage == null) {
 			throw new IllegalArgumentException("Cannot set background image to null!");
@@ -68,12 +86,14 @@ public class BackgroundSubtractor {
 		}
 	}
 
+	/**
+	 * Set the blur radius to use
+	 * 
+	 * @param radius
+	 *            <code>int</code> Blur Radius.
+	 */
 	public void setBlurRadius(int radius) {
 		blurRadius = radius;
-	}
-
-	public int getBlurRadius() {
-		return blurRadius;
 	}
 
 	/**
