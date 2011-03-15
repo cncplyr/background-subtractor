@@ -1,9 +1,14 @@
 package fileHandling;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
+import au.com.bytecode.opencsv.CSVReader;
 import au.com.bytecode.opencsv.CSVWriter;
 
 /**
@@ -13,13 +18,33 @@ import au.com.bytecode.opencsv.CSVWriter;
  * from the openCSV 2.2 library.
  * 
  * @author cncplyr
- * @version 0.3
+ * @version 0.4
  * 
  */
 public class CSVHandler {
 	CSVWriter writer;
 	private String csvFolder = "output";
 	private String fileName = "boundingBoxes";
+
+	/**
+	 * Reads the currently selected file and returns it.
+	 * 
+	 * @return The requested file in the form of a List of arrays of strings.
+	 *         Each array represents a single row.
+	 */
+	public List<String[]> readCSV() {
+		CSVReader reader;
+		List<String[]> myEntries = new ArrayList<String[]>();
+		try {
+			reader = new CSVReader(new FileReader(getCSVFolder() + File.separator + getFileName() + ".csv"));
+			myEntries = reader.readAll();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return myEntries;
+	}
 
 	/**
 	 * Opens a <code>CSVWriter</code> to write to, using the current output
