@@ -3,6 +3,7 @@ package backgroundSubtractor;
 import imageProcessing.ImageSubtractor;
 
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.util.List;
 
 import fileHandling.CSVHandler;
@@ -41,7 +42,7 @@ public class BackgroundSubtractor {
 		// Set up file handling and image properties
 		imageSubtractor.setBlurRadius(blurRadius);
 		fileHandler.setInputFolder("input");
-		fileHandler.setOutputFolder("output");
+		fileHandler.setOutputFolder("output" + File.separator + "p1");
 		// Get the list of file names
 		List<String> imageNames = fileHandler.getAllImageNamesMatching("image");
 		int counter = 0;
@@ -53,7 +54,7 @@ public class BackgroundSubtractor {
 			try {
 				BufferedImage currentImage = fileHandler.loadImage(name);
 				BufferedImage subtractedImage = imageSubtractor.subtractBackground(currentImage);
-				fileHandler.saveImage(subtractedImage, formatFileName("outputImage", counter++));
+				fileHandler.saveImage(subtractedImage, formatFileName("frame", counter++));
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
