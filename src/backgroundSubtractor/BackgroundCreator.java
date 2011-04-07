@@ -50,6 +50,11 @@ public class BackgroundCreator {
 		System.out.print("Loading Images...");
 		int noOfImages = fileHandler.getTotalImagesMatching(fileName);
 		if (noOfImages < 1) {
+			/* No images found in folder, try other folder */
+			fileHandler.setInputFolder("input");
+			noOfImages = fileHandler.getTotalImagesMatching(fileName);
+		}
+		if (noOfImages < 1) {
 			/* No images found */
 			throw new Exception("Could not find any images!");
 		} else if (noOfImages < 300) {
