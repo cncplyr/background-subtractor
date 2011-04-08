@@ -6,7 +6,7 @@ import java.awt.image.BufferedImage;
 /**
  * 
  * @author cncplyr
- * @version 0.1
+ * @version 0.2
  * 
  */
 public class BoundingBoxer {
@@ -15,66 +15,77 @@ public class BoundingBoxer {
 
 	}
 
-	public BufferedImage createBoundingBox(BufferedImage inputImage) {
-		return drawBoundingBox(inputImage, getBoundingBox(inputImage));
-	}
-
 	/*
 	 * Returns the (x,y) coordinates of the top left and bottom right of the
 	 * bounding box.
 	 */
-	public int[] getBoundingBox(BufferedImage inputImage) {
+	public Metrics getBoundingBox(BufferedImage inputImage, Metrics prevMetrics) {
 		int width = inputImage.getWidth();
 		int height = inputImage.getHeight();
-		int[] boundingBox = new int[4];
-		boundingBox[0] = width;
-		boundingBox[1] = height;
-		boundingBox[2] = 0;
-		boundingBox[3] = 0;
-		// Implement some kind of search here
+		Metrics metrics = new Metrics(width, height, 0, 0);
+		// TODO: Implement some kind of search here
+		int halfWidth, halfHeight;
+		int startX = 0;
+		int startY = 0;
+		// TODO: endX doesn't work for some reason, when person moves
+		// left->right
+		int endX = width - 1;
+		int endY = height - 1;
+		if (prevMetrics != null) {
+			halfWidth = Math.abs(prevMetrics.getAbsEndX() - prevMetrics.getAbsStartX()) / 2;
+			startX = prevMetrics.getAbsStartX() - halfWidth;
+			endX = prevMetrics.getAbsEndX() + halfWidth;
+			startX = (startX < 0) ? 0 : startX;
+			endX = (endY >= width) ? width - 1 : endX;
 
+			halfHeight = Math.abs(prevMetrics.getAbsEndY() - prevMetrics.getAbsStartY()) / 2;
+			startY = prevMetrics.getAbsStartY() - halfHeight;
+			endY = prevMetrics.getAbsEndY() + halfHeight;
+			startY = (startY < 0) ? 0 : startY;
+			endY = (endY >= height) ? height - 1 : endY;
+		}
 
-		// START: Dumb brute-force search
+		// START: Slightly Smarter Brute-Force Search (SSBFS)
 		int[] scanline = new int[width];
 		boolean currentScanlineFlag = false;
 
 		// Find the first (x, y) pair
-		for (int y = 0; y < height; y++) {
+		for (int y = startY; y < height; y++) {
 			scanline = inputImage.getRGB(0, y, width, 1, null, 0, width);
-			for (int x = 0; x < width; x++) {
+			for (int x = startX; x < width; x++) {
 				if (!currentScanlineFlag) {
 					// First non-alpha pixel in the line
 					if ((scanline[x] & 0x0000FF) != 0) {
-						if (x < boundingBox[0]) {
+						if (x < metrics.getAbsStartX()) {
 							// store the new start-x value
-							boundingBox[0] = x;
+							metrics.setAbsStartX(x);
 							currentScanlineFlag = true;
 						}
 					}
-					if (currentScanlineFlag && y < boundingBox[1]) {
+					if (currentScanlineFlag && y < metrics.getAbsStartY()) {
 						// store the start-y value
-						boundingBox[1] = y;
+						metrics.setAbsStartY(y);
 					}
 				}
 			}
 			currentScanlineFlag = false;
 		}
 		// Find teh last (x, y) pair
-		for (int y = height - 1; y > boundingBox[1]; y--) {
+		for (int y = endY; y > metrics.getAbsStartY(); y--) {
 			scanline = inputImage.getRGB(0, y, width, 1, null, 0, width);
-			for (int x = width - 1; x > boundingBox[0]; x--) {
+			for (int x = width - 1; x > metrics.getAbsStartX(); x--) {
 				if (!currentScanlineFlag) {
 					// First non-alpha pixel in the line
 					if ((scanline[x] & 0x0000FF) != 0) {
-						if (x > boundingBox[2]) {
+						if (x > metrics.getAbsEndX()) {
 							// store the new start-x value
-							boundingBox[2] = x;
+							metrics.setAbsEndX(x);
 							currentScanlineFlag = true;
 						}
 					}
-					if (currentScanlineFlag && y > boundingBox[3]) {
+					if (currentScanlineFlag && y > metrics.getAbsEndY()) {
 						// store the start-y value
-						boundingBox[3] = y;
+						metrics.setAbsEndY(y);
 					}
 				}
 			}
@@ -82,7 +93,7 @@ public class BoundingBoxer {
 		}
 		// END: Dumb brute-force search
 
-		return boundingBox;
+		return metrics;
 	}
 
 	/**
@@ -92,34 +103,31 @@ public class BoundingBoxer {
 	 * this method proved to be just as fast, and less complicated so I stuck
 	 * with this.
 	 * 
+	 * 
 	 * @param image
-	 * @param coords
-	 *            The coordinates. The coordinates are in the form: coords[0] =
-	 *            startX coords[1] = startY coords[2] = endX coords[3] = endY
+	 * @param metrics
 	 * @return The image with the border drawn.
 	 */
-	public BufferedImage drawBoundingBox(BufferedImage image, int[] coords) {
+	public BufferedImage drawBoundingBox(BufferedImage image, Metrics metrics) {
 		// Move border out by 1 pixel so we don't lose information.
-		coords[0]--;
-		coords[1]--;
-		coords[2]++;
-		coords[3]++;
+		int startX = metrics.getAbsStartX() - 1;
+		int startY = metrics.getAbsStartY() - 1;
+		int endX = metrics.getAbsEndX() + 1;
+		int endY = metrics.getAbsEndY() + 1;
 
-		for (int x = coords[0]; x < coords[2]; x++) {
+		for (int x = startX; x < endX; x++) {
 			// Top line
-			image.setRGB(x, coords[1], Color.red.getRGB());
+			image.setRGB(x, startY, Color.red.getRGB());
 			// Bottom line
-			image.setRGB(x, coords[3], Color.red.getRGB());
+			image.setRGB(x, endY, Color.red.getRGB());
 		}
-		for (int y = coords[1]; y < coords[3]; y++) {
+		for (int y = startY; y < endY; y++) {
 			// Left line
-			image.setRGB(coords[0], y, Color.red.getRGB());
+			image.setRGB(startX, y, Color.red.getRGB());
 			// Right line
-			image.setRGB(coords[2], y, Color.red.getRGB());
+			image.setRGB(endX, y, Color.red.getRGB());
 		}
-
 
 		return image;
 	}
-
 }

@@ -50,17 +50,48 @@ public class ImageMasker {
 	 * 
 	 * @param blurredInputImage
 	 * @param blurredBackgroundImage
+	 * @param metrics
 	 * @param threshold
 	 * @return
 	 */
-	public BufferedImage createMask(BufferedImage blurredInputImage, BufferedImage blurredBackgroundImage, int threshold) {
-		int width = blurredInputImage.getWidth();
-		int height = blurredInputImage.getHeight();
+	public BufferedImage createMask(BufferedImage blurredInputImage, BufferedImage blurredBackgroundImage, Metrics metrics, int threshold) {
+		int imgWidth = blurredInputImage.getWidth();
+		int imgHeight = blurredInputImage.getHeight();
 
-		BufferedImage mask = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+		int startX, startY;
+		int endX, endY;
 
-		for (int x = 0; x < width; x++) {
-			for (int y = 0; y < height; y++) {
+		int bbHeight = 0, bbWidth = 0;
+
+		boolean foundSomething = false;
+
+		if (metrics == null) {
+			// Just search the whole image
+			startX = 0;
+			startY = 0;
+			endX = imgWidth;
+			endY = imgHeight;
+		} else {
+			// Search a box twice as wide and twice as tall
+			bbWidth = (Math.abs(metrics.getAbsEndX() - metrics.getAbsStartX())) / 2;
+			bbHeight = (Math.abs(metrics.getAbsEndY() - metrics.getAbsStartY())) / 2;
+
+			startX = metrics.getAbsStartX() - bbWidth;
+			startY = metrics.getAbsStartY() - bbHeight;
+			endX = metrics.getAbsEndX() + bbWidth;
+			endY = metrics.getAbsEndY() + bbWidth;
+
+			// Check search is in available range
+			startX = (startX < 0) ? 0 : startX;
+			startY = (startY < 0) ? 0 : startY;
+			endX = (endX > imgWidth) ? imgWidth : endX;
+			endY = (endY > imgHeight) ? imgHeight : endY;
+		}
+
+		BufferedImage mask = new BufferedImage(imgWidth, imgHeight, BufferedImage.TYPE_INT_ARGB);
+
+		for (int x = startX; x < endX; x++) {
+			for (int y = startY; y < endY; y++) {
 				// Get the RGB values of the same pixel in each image.
 				Color bgColour = new Color(blurredBackgroundImage.getRGB(x, y));
 				Color imgColour = new Color(blurredInputImage.getRGB(x, y));
@@ -74,29 +105,35 @@ public class ImageMasker {
 				} else {
 					// else add it to the mask
 					mask.setRGB(x, y, black.getRGB());
+					foundSomething = true;
 				}
 			}
 		}
 
-		return mask;
+		if (!foundSomething) {
+			return createMask(blurredInputImage, blurredBackgroundImage, null, threshold);
+		} else {
+			return mask;
+		}
 	}
 
 	/**
 	 * Contracts and expands a mask, to remove erroneous strands of pixels.
 	 * 
 	 * @param inputMask
+	 * @param metrics
 	 * @param times
 	 *            The number of times to contract/expand.
 	 * @return
 	 */
-	public BufferedImage contractExpand(BufferedImage inputMask, int[] maskBoundingBox, int times) {
+	public BufferedImage contractExpand(BufferedImage inputMask, Metrics metrics, int times) {
 		// Contract the mask the required number of times
 		for (int i = 0; i < times; i++) {
-			inputMask = contractOne(inputMask, maskBoundingBox);
+			inputMask = contractOne(inputMask, metrics);
 		}
 		// Expand the mask the required number of times
 		for (int i = 0; i < times; i++) {
-			inputMask = expandOne(inputMask, maskBoundingBox);
+			inputMask = expandOne(inputMask, metrics);
 		}
 		return inputMask;
 	}
@@ -106,18 +143,19 @@ public class ImageMasker {
 	 * by 1 pixel.
 	 * 
 	 * @param inputImage
+	 * @param metrics
 	 * @return
 	 */
-	private BufferedImage contractOne(BufferedImage inputMask, int[] boundingBox) {
+	private BufferedImage contractOne(BufferedImage inputMask, Metrics metrics) {
 		int width = inputMask.getWidth();
 		int height = inputMask.getHeight();
 		BufferedImage finalMask = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
 		// Create local variables for the bounding box to keep the code neat
 		// here, and in case the type of boundingBox gets changed later.
-		int x1 = boundingBox[0];
-		int x2 = boundingBox[2];
-		int y1 = boundingBox[1];
-		int y2 = boundingBox[3];
+		int x1 = metrics.getAbsStartX();
+		int x2 = metrics.getAbsEndX();
+		int y1 = metrics.getAbsStartY();
+		int y2 = metrics.getAbsEndY();
 
 		List<Integer> colourGrid;
 
@@ -150,18 +188,19 @@ public class ImageMasker {
 	 * by 1 pixel.
 	 * 
 	 * @param inputMask
+	 * @param metrics
 	 * @return
 	 */
-	private BufferedImage expandOne(BufferedImage inputMask, int[] boundingBox) {
+	private BufferedImage expandOne(BufferedImage inputMask, Metrics metrics) {
 		int width = inputMask.getWidth();
 		int height = inputMask.getHeight();
 		BufferedImage finalMask = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
 		// Create local variables for the bounding box to keep the code neat
 		// here, and in case the type of boundingBox gets changed later.
-		int x1 = boundingBox[0];
-		int x2 = boundingBox[2];
-		int y1 = boundingBox[1];
-		int y2 = boundingBox[3];
+		int x1 = metrics.getAbsStartX();
+		int x2 = metrics.getAbsEndX();
+		int y1 = metrics.getAbsStartY();
+		int y2 = metrics.getAbsEndY();
 
 
 		List<Integer> colourGrid;

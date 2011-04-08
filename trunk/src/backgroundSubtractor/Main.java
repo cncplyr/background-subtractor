@@ -17,12 +17,12 @@ public class Main {
 	public static void main(String[] args) {
 		backgroundCreator = new BackgroundCreator();
 		backgroundSubtractor = new BackgroundSubtractor();
-		p2gen = new P2ImageCreator();
-		
+		// p2gen = new P2ImageCreator();
+
 		createBackground();
 		subtractBackground();
-		generateP2();
-		
+		// generateP2();
+
 		System.exit(0);
 	}
 
@@ -46,14 +46,14 @@ public class Main {
 		backgroundSubtractor.subtractAll();
 	}
 
-	public static void generateP2(){
+	public static void generateP2() {
 		p2gen.generateImages();
 	}
-	
+
 	/**
 	 * Set up the GUI.
 	 */
 	public static void createGUI() {
-		
+
 	}
 }
