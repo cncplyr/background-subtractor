@@ -15,40 +15,6 @@ public class MetricsCentroid {
 		this.avgFinder = new AverageFinder();
 	}
 
-	public void findCentroidAverage(BufferedImage image, Metrics imageMetrics) {
-		int boxWidth = imageMetrics.getAbsEndX() - imageMetrics.getAbsStartX();
-
-		List<Integer> averages = new ArrayList<Integer>();
-
-		for (int y = imageMetrics.getAbsStartY(); y < imageMetrics.getAbsEndY(); y++) {
-			// for each scanline
-			int[] row = image.getRGB(imageMetrics.getAbsStartX(), y, boxWidth, 1, null, 0, boxWidth);
-			int start = boxWidth;
-			int end = 0;
-
-			// Find the first non-alpha
-			for (int x = 0; x < boxWidth; x++) {
-				if ((row[x] & 0x0000FF) != 0) {
-					start = x;
-					break;
-				}
-			}
-			// Find the last non-alpha
-			for (int x = boxWidth - 1; x > start; x--) {
-				if ((row[x] & 0x0000FF) != 0) {
-					end = x;
-					break;
-				}
-			}
-			// Add average to list of averages
-			averages.add((start + end) / 2);
-		}
-		// Find the average
-		int avgCentroid = avgFinder.findMedian(averages);
-		// Store it
-		imageMetrics.setRelCentroidX(avgCentroid);
-	}
-
 	public void findCentroidMetrics(BufferedImage image, Metrics imageMetrics, Metrics prevMetrics) {
 		/* X-Centroid */
 		int boxWidth = imageMetrics.getAbsEndX() - imageMetrics.getAbsStartX();
@@ -93,7 +59,6 @@ public class MetricsCentroid {
 		int xVelocity = 0;
 		if (prevMetrics != null) {
 			xVelocity = (imageMetrics.getAbsStartX() + xAvgCentroid) - (prevMetrics.getAbsStartX() + prevMetrics.getRelCentroidX());
-			System.out.println("\nxVelocity: " + xVelocity);
 		}
 		// Store it
 		imageMetrics.setRelVelocityX(xVelocity);
