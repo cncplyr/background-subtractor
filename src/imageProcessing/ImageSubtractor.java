@@ -12,16 +12,20 @@ import fileHandling.CSVHandler;
  * 
  */
 public class ImageSubtractor {
+	private BufferedImage backgroundImage;
+	private CSVHandler csvHandler;
+
 	private BoundingBoxer boundingBoxer;
 	private ImageBlurrer imageBlur;
 	private ImageCropper imageCrop;
 	private ImageMasker imageMasker;
-	private BufferedImage backgroundImage;
-	private CSVHandler csvHandler;
+	private MetricsCentroid metricsCentroid;
 
 	private int blurRadius;
 	private int maskRadius;
 	private int threshold;
+
+	private Metrics prevBBox;
 
 	/**
 	 * Constructor. Initialises classes and integers needed.
@@ -31,11 +35,13 @@ public class ImageSubtractor {
 	 * @param threshold
 	 */
 	public ImageSubtractor(int width, int height, int threshold) {
+		this.backgroundImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+
 		this.boundingBoxer = new BoundingBoxer();
 		this.imageBlur = new ImageBlurrer();
 		this.imageCrop = new ImageCropper();
 		this.imageMasker = new ImageMasker();
-		this.backgroundImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+		this.metricsCentroid = new MetricsCentroid();
 
 		setBlurRadius(11);
 		setMaskRadius(2);
@@ -52,13 +58,27 @@ public class ImageSubtractor {
 	 * @return The subtracted image.
 	 */
 	public BufferedImage subtractBackground(BufferedImage inputImage) {
-		BufferedImage mask = imageMasker.createMask(imageBlur.averageBlur(inputImage, blurRadius), backgroundImage, threshold);
-		int[] imageBBox = boundingBoxer.getBoundingBox(mask);
+		// Get the mask from the blurred image
+		BufferedImage mask = imageMasker.createMask(imageBlur.averageBlur(inputImage, blurRadius), backgroundImage, prevBBox, threshold);
+		// Get the bounding box from the mask
+		Metrics imageMetrics = boundingBoxer.getBoundingBox(mask, prevBBox);
+		// Improve the image
+		mask = imageMasker.contractExpand(mask, imageMetrics, maskRadius);
+		// Mask the image
+		BufferedImage maskedImage = imageMasker.applyMask(inputImage, mask);
+		// TODO: Get metrics
+		metricsCentroid.findCentroidMetrics(maskedImage, imageMetrics, prevBBox);
+		// Store bounding box to use in next iteration
+		prevBBox = imageMetrics;
+		// Store it to the csv
 		if (csvHandler != null) {
-			csvHandler.writeCSVLine(imageBBox);
+			csvHandler.writeCSVLine(imageMetrics.getMetrics());
 		}
-		mask = imageMasker.contractExpand(mask, imageBBox, maskRadius);
-		return imageCrop.cropImage(imageMasker.applyMask(inputImage, mask), imageBBox);
+		return metricsCentroid.drawMetrics(boundingBoxer.drawBoundingBox(maskedImage, imageMetrics), imageMetrics);
+		// Return the cropped image
+		// return
+		// imageCrop.cropImage(metricsCentroid.drawMetrics(boundingBoxer.drawBoundingBox(maskedImage,
+		// imageMetrics), imageMetrics), imageMetrics);
 	}
 
 	public BufferedImage getBackgroundImage() {
