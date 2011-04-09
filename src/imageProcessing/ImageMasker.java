@@ -5,6 +5,8 @@ import java.awt.image.BufferedImage;
 import java.util.Arrays;
 import java.util.List;
 
+import metrics.Metrics;
+
 /**
  * This class implements the Circular _____ thing to remove odd outliers,
  * creating a smoother mask. Works only with masks.
@@ -111,6 +113,9 @@ public class ImageMasker {
 		}
 
 		if (!foundSomething) {
+			// TODO: This doesn't work!
+			// Tell metrics we are in a different place, so ignore velocity
+			metrics.setRelVelocityX(-1);
 			return createMask(blurredInputImage, blurredBackgroundImage, null, threshold);
 		} else {
 			return mask;

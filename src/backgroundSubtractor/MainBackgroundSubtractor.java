@@ -9,7 +9,7 @@ import java.awt.image.BufferedImage;
  * @version 0.3
  * 
  */
-public class Main {
+public class MainBackgroundSubtractor {
 	private static BackgroundCreator backgroundCreator;
 	private static BackgroundSubtractor backgroundSubtractor;
 	private static P2ImageCreator p2gen;

@@ -1,8 +1,14 @@
-package imageProcessing;
+package metrics;
 
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This is a data class which contains various metrics used for computing
+ * animations.
+ * 
+ * @author Richard Jenkin
+ */
 public class Metrics {
 	private int absStartX;
 	private int absStartY;
@@ -12,6 +18,18 @@ public class Metrics {
 	private int relEccentricityX;
 	private int relVelocityX;
 
+	/**
+	 * Constructor. Relative metrics all default to 0.
+	 * 
+	 * @param absStartX
+	 *            x-coordinate of top-left corner of bounding box.
+	 * @param absStartY
+	 *            y-coordinate of top-left corner of bounding box.
+	 * @param absEndX
+	 *            x-coordinate of bottom-right corner of bounding box.
+	 * @param absEndY
+	 *            y-coordinate of bottom-right corner of bounding box.
+	 */
 	public Metrics(int absStartX, int absStartY, int absEndX, int absEndY) {
 		this.setAbsStartX(absStartX);
 		this.setAbsStartY(absStartY);
@@ -23,8 +41,8 @@ public class Metrics {
 	}
 
 	/**
-	 * Get all metrics in the form of a list. Here only for backwards
-	 * compatibility.
+	 * Get all metrics in the form of a list. Here only for compatibility with
+	 * our CSV-writer.
 	 * 
 	 * @return
 	 */

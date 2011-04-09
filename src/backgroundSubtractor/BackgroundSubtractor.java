@@ -6,6 +6,8 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.List;
 
+import metrics.Metrics;
+
 import fileHandling.CSVHandler;
 import fileHandling.FileHandler;
 
@@ -33,10 +35,12 @@ public class BackgroundSubtractor {
 	}
 
 	/**
-	 * Subtract the background from all images. Uses parameter already set.
+	 * Subtract the background from all images. Uses parameters already set.
 	 */
 	public void subtractAll() {
 		System.out.println("Subtracting background: ");
+		// Largest Metrics for cropping
+		Metrics largestMetric = new Metrics(0, 0, 0, 0);
 		// Set up csv writer
 		csvHandler.openCSVStream();
 		// Set up file handling and image properties
