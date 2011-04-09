@@ -3,6 +3,8 @@ package imageProcessing;
 import java.awt.image.BufferedImage;
 import java.util.List;
 
+import metrics.Metrics;
+
 public class ImageCropper {
 
 	public ImageCropper() {

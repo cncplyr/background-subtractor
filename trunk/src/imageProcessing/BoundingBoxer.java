@@ -3,6 +3,8 @@ package imageProcessing;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 
+import metrics.Metrics;
+
 /**
  * 
  * @author cncplyr
@@ -23,12 +25,11 @@ public class BoundingBoxer {
 		int width = inputImage.getWidth();
 		int height = inputImage.getHeight();
 		Metrics metrics = new Metrics(width, height, 0, 0);
-		// TODO: Implement some kind of search here
+
+		// Prepare previous metrics for enhanced search
 		int halfWidth, halfHeight;
 		int startX = 0;
 		int startY = 0;
-		// TODO: endX doesn't work for some reason, when person moves
-		// left->right
 		int endX = width - 1;
 		int endY = height - 1;
 		if (prevMetrics != null) {
@@ -91,7 +92,7 @@ public class BoundingBoxer {
 			}
 			currentScanlineFlag = false;
 		}
-		// END: Dumb brute-force search
+		// END: Slightly Smarter Brute-Force Search (SSBFS)
 
 		return metrics;
 	}

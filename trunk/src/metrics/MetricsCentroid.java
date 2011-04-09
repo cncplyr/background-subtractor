@@ -1,4 +1,4 @@
-package imageProcessing;
+package metrics;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
@@ -7,14 +7,35 @@ import java.util.List;
 
 import maths.AverageFinder;
 
+/**
+ * This class calculates various useful metrics about an image.
+ * 
+ * @author Richard Jenkin
+ * 
+ */
 public class MetricsCentroid {
 	AverageFinder avgFinder;
 
-
+	/**
+	 * Constructor
+	 */
 	public MetricsCentroid() {
 		this.avgFinder = new AverageFinder();
 	}
 
+	/**
+	 * Finds the x-centroid, x-eccentricity and x-velocity of an input image,
+	 * using metrics from the previous image.
+	 * 
+	 * @param image
+	 *            The image to find metrics for.
+	 * @param imageMetrics
+	 *            The given metrics. Should only contain the bounding-box
+	 *            coordinates, and velocity flag.
+	 * @param prevMetrics
+	 *            The metrics from the previous image. Should be complete. If
+	 *            null, x-velocity will be 0.
+	 */
 	public void findCentroidMetrics(BufferedImage image, Metrics imageMetrics, Metrics prevMetrics) {
 		/* X-Centroid */
 		int boxWidth = imageMetrics.getAbsEndX() - imageMetrics.getAbsStartX();
@@ -57,13 +78,26 @@ public class MetricsCentroid {
 
 		/* X-Velocity */
 		int xVelocity = 0;
-		if (prevMetrics != null) {
+		if ((imageMetrics.getRelVelocityX() != -1) && (prevMetrics != null)) {
 			xVelocity = (imageMetrics.getAbsStartX() + xAvgCentroid) - (prevMetrics.getAbsStartX() + prevMetrics.getRelCentroidX());
 		}
 		// Store it
 		imageMetrics.setRelVelocityX(xVelocity);
 	}
 
+	/**
+	 * Draws metrics to the image for testing and debugging purposes. Bounding
+	 * Box: Red Box. Half-X Bounding Box: Red vertical line. X-Centroid: Green
+	 * vertical line. X-Eccentricity: Distance between red and green vertical
+	 * lines. X-Velocity: Green horizontal line connected to X-Centroid.
+	 * 
+	 * 
+	 * @param image
+	 *            The image to draw metrics on.
+	 * @param imageMetrics
+	 *            The metrics to draw.
+	 * @return The image with the metrics drawn to it.
+	 */
 	public BufferedImage drawMetrics(BufferedImage image, Metrics imageMetrics) {
 		/* X-Centroid */
 		// Green line down image centre
