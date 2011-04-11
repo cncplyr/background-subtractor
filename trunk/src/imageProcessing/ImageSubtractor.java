@@ -76,7 +76,7 @@ public class ImageSubtractor {
 		// Get metrics
 		metricsCentroid.findCentroidMetrics(maskedImage, imageMetrics, prevMetrics);
 		// Store bounding box to use in next iteration
-		prevMetrics = imageMetrics;
+		this.prevMetrics = imageMetrics;
 		// Store it to the csv
 		if (csvHandler != null) {
 			csvHandler.writeCSVLine(imageMetrics.getMetrics());
@@ -84,9 +84,11 @@ public class ImageSubtractor {
 		// Check size
 		checkLargestBBox(imageMetrics);
 		// Return the image with debug information
-		return metricsCentroid.drawMetrics(boundingBoxer.drawBoundingBox(maskedImage, imageMetrics), imageMetrics);
+		// return
+		// metricsCentroid.drawMetrics(boundingBoxer.drawBoundingBox(maskedImage,
+		// imageMetrics), imageMetrics);
 		// Return the image
-		// return maskedImage;
+		return maskedImage;
 	}
 
 	public Metrics getLargestBoundingBox() {
@@ -154,7 +156,7 @@ public class ImageSubtractor {
 		int tempX = 0;
 		if (currentMetrics.getRelCentroidX() > ((currentMetrics.getAbsEndX() - currentMetrics.getAbsStartX()) / 2)) {
 			// Case 1: Large +ve eccentricity#
-			tempX = 2 * currentMetrics.getRelCentroidX();
+			tempX = currentMetrics.getRelCentroidX();
 		} else {
 			// Case 2: Large -ve eccentricity
 			tempX = currentMetrics.getAbsEndX() - currentMetrics.getAbsStartX() - currentMetrics.getRelCentroidX();

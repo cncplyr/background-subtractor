@@ -1,10 +1,16 @@
 package backgroundSubtractor;
 
+import imageProcessing.ImageCentraliser;
 import imageProcessing.ImageSubtractor;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.List;
+
+import opencsv.CSVReader;
 
 import metrics.Metrics;
 
@@ -20,6 +26,7 @@ import fileHandling.FileHandler;
 public class BackgroundSubtractor {
 	private FileHandler fileHandler;
 	private ImageSubtractor imageSubtractor;
+	private ImageCentraliser imageCentraliser;
 	private CSVHandler csvHandler;
 	private int blurRadius;
 
@@ -31,6 +38,7 @@ public class BackgroundSubtractor {
 		csvHandler = new CSVHandler();
 		imageSubtractor = new ImageSubtractor(1280, 720, 20);
 		imageSubtractor.setCSVHandler(csvHandler);
+		imageCentraliser = new ImageCentraliser();
 		blurRadius = 11;
 	}
 
@@ -38,9 +46,8 @@ public class BackgroundSubtractor {
 	 * Subtract the background from all images. Uses parameters already set.
 	 */
 	public void subtractAll() {
+		/* Getting metrics */
 		System.out.println("Subtracting background: ");
-		// Largest Metrics for cropping
-		Metrics largestMetric = new Metrics(0, 0, 0, 0);
 		// Set up csv writer
 		csvHandler.openCSVStream();
 		// Set up file handling and image properties
@@ -66,6 +73,44 @@ public class BackgroundSubtractor {
 		}
 		// Close csv writer
 		csvHandler.closeCSVStream();
+
+		/* Crop and centralise images */
+		CSVReader reader = null;
+		try {
+			reader = new CSVReader(new FileReader("output" + File.separator + "metrics.csv"));
+		} catch (FileNotFoundException e2) {
+			e2.printStackTrace();
+		}
+		String[] nextLine = null;
+
+
+		imageCentraliser.setCropSize(imageSubtractor.getLargestBoundingBox());
+		fileHandler.setInputFolder("output" + File.separator + "p1");
+		// Get the list of file names
+		List<String> imageNames2 = fileHandler.getAllImageNamesMatching("frame");
+		counter = 0;
+		for (String name : imageNames2) {
+			iStart = System.currentTimeMillis();
+			System.out.print(name);
+			try {
+				nextLine = reader.readNext();
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+			if (nextLine == null) {
+				// TODO: Something broke, throw some exception?
+			}
+
+			try {
+				BufferedImage currentImage = fileHandler.loadImage(name);
+				BufferedImage centralisedImage = imageCentraliser.centralCrop(currentImage, new Metrics(nextLine));
+				fileHandler.saveImage(centralisedImage, formatFileName("frame", counter++));
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			System.out.println("\tDone! t=" + (System.currentTimeMillis() - iStart));
+		}
+
 	}
 
 	/**
