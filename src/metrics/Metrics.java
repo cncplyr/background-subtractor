@@ -40,6 +40,16 @@ public class Metrics {
 		this.setRelVelocityX(0);
 	}
 
+	public Metrics(String[] data) {
+		this.setAbsStartX(Integer.parseInt(data[0]));
+		this.setAbsStartY(Integer.parseInt(data[1]));
+		this.setAbsEndX(Integer.parseInt(data[2]));
+		this.setAbsEndY(Integer.parseInt(data[3]));
+		this.setRelCentroidX(Integer.parseInt(data[4]));
+		this.setRelEccentricityX(Integer.parseInt(data[5]));
+		this.setRelVelocityX(Integer.parseInt(data[6]));
+	}
+
 	/**
 	 * Get all metrics in the form of a list. Here only for compatibility with
 	 * our CSV-writer.

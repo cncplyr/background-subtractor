@@ -21,7 +21,7 @@ public class MainBackgroundSubtractor {
 
 		createBackground();
 		subtractBackground();
-		// generateP2();
+		generateP2();
 
 		System.exit(0);
 	}
