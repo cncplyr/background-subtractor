@@ -17,7 +17,7 @@ public class MainBackgroundSubtractor {
 	public static void main(String[] args) {
 		backgroundCreator = new BackgroundCreator();
 		backgroundSubtractor = new BackgroundSubtractor();
-		// p2gen = new P2ImageCreator();
+		p2gen = new P2ImageCreator();
 
 		createBackground();
 		subtractBackground();

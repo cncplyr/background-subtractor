@@ -2,6 +2,7 @@ package imageProcessing;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -109,6 +110,14 @@ public class ImageMasker {
 					mask.setRGB(x, y, black.getRGB());
 					foundSomething = true;
 				}
+				/*
+				 * Green for trees. I hate trees. N.B. This is a rather specific
+				 * check for the 3rd set of videos captured. Comment out for
+				 * other videos.
+				 */
+//				if ((imgColour.getGreen() > imgColour.getBlue()) && (imgColour.getGreen() > imgColour.getRed())) {
+//					mask.setRGB(x, y, alpha.getRGB());
+//				}
 			}
 		}
 
@@ -139,6 +148,18 @@ public class ImageMasker {
 		// Expand the mask the required number of times
 		for (int i = 0; i < times; i++) {
 			inputMask = expandOne(inputMask, metrics);
+		}
+		return inputMask;
+	}
+
+	public BufferedImage expandContract(BufferedImage inputMask, Metrics metrics, int times) {
+		// Expand the mask the required number of times
+		for (int i = 0; i < times; i++) {
+			inputMask = expandOne(inputMask, metrics);
+		}
+		// Contract the mask the required number of times
+		for (int i = 0; i < times; i++) {
+			inputMask = contractOne(inputMask, metrics);
 		}
 		return inputMask;
 	}
@@ -248,7 +269,11 @@ public class ImageMasker {
 	 * @return
 	 */
 	private List<Integer> getLocalColoursAsList(BufferedImage image, int x, int y) {
-		List list = Arrays.asList(image.getRGB(x - 1, y - 1, 3, 3, null, 0, 3));
+		int[] arr = image.getRGB(x - 1, y - 1, 3, 3, null, 0, 3);
+		List<Integer> list = new ArrayList<Integer>();
+		for (int i : arr) {
+			list.add(i);
+		}
 		return list;
 	}
 }
