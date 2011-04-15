@@ -70,11 +70,12 @@ public class ImageSubtractor {
 		// Get the bounding box from the mask
 		Metrics imageMetrics = boundingBoxer.getBoundingBox(mask, prevMetrics);
 		// Improve the image
+		mask = imageMasker.expandContract(mask, imageMetrics, maskRadius);
 		mask = imageMasker.contractExpand(mask, imageMetrics, maskRadius);
+		// Get metrics
+		metricsCentroid.findCentroidMetrics(mask, imageMetrics, prevMetrics);
 		// Mask the image
 		BufferedImage maskedImage = imageMasker.applyMask(inputImage, mask);
-		// Get metrics
-		metricsCentroid.findCentroidMetrics(maskedImage, imageMetrics, prevMetrics);
 		// Store bounding box to use in next iteration
 		this.prevMetrics = imageMetrics;
 		// Store it to the csv

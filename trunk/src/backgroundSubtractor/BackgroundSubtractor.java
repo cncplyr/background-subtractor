@@ -36,7 +36,7 @@ public class BackgroundSubtractor {
 	public BackgroundSubtractor() {
 		fileHandler = new FileHandler();
 		csvHandler = new CSVHandler();
-		imageSubtractor = new ImageSubtractor(1280, 720, 20);
+		imageSubtractor = new ImageSubtractor(1280, 720, 15);
 		imageSubtractor.setCSVHandler(csvHandler);
 		imageCentraliser = new ImageCentraliser();
 		blurRadius = 11;
