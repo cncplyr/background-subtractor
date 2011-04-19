@@ -176,6 +176,7 @@ public class ImageMasker {
 
 		int xStart = metrics.getAbsStartX() + metrics.getRelCentroidX() - 250;
 		int xEnd = metrics.getAbsStartX() + metrics.getRelCentroidX() + 250;
+		xStart = (xStart < 0) ? 0 : xStart;
 		xEnd = (xEnd > imgWidth) ? imgWidth : xEnd;
 
 		// TODO: Fix the getRGB() long version
@@ -200,7 +201,7 @@ public class ImageMasker {
 	 * @param metrics
 	 * @return
 	 */
-	private BufferedImage contractOne(BufferedImage inputMask, Metrics metrics) {
+	public BufferedImage contractOne(BufferedImage inputMask, Metrics metrics) {
 		int width = inputMask.getWidth();
 		int height = inputMask.getHeight();
 		BufferedImage finalMask = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
@@ -245,7 +246,7 @@ public class ImageMasker {
 	 * @param metrics
 	 * @return
 	 */
-	private BufferedImage expandOne(BufferedImage inputMask, Metrics metrics) {
+	public BufferedImage expandOne(BufferedImage inputMask, Metrics metrics) {
 		int width = inputMask.getWidth();
 		int height = inputMask.getHeight();
 		BufferedImage finalMask = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
@@ -280,6 +281,41 @@ public class ImageMasker {
 			}
 		}
 
+		return finalMask;
+	}
+
+	public BufferedImage expandLocalArea(BufferedImage inputMask, Metrics metrics, Metrics area) {
+		int width = inputMask.getWidth();
+		int height = inputMask.getHeight();
+		BufferedImage finalMask = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+		// Copy current mask
+		finalMask.setRGB(0, 0, width, height, inputMask.getRGB(0, 0, width, height, null, 0, width), 0, width);
+
+		// Create local variables for the bounding box to keep the code neat
+		// here, and in case the type of boundingBox gets changed later.
+		int x1 = area.getAbsStartX();
+		int x2 = area.getAbsEndX();
+		int y1 = area.getAbsStartY();
+		int y2 = area.getAbsEndY();
+
+		List<Integer> colourGrid;
+
+		/* Expand by one */
+		// For each pixel
+		for (int x = x1; x < x2; x++) {
+			for (int y = y1; y < y2; y++) {
+				// check pixel for bordering mask
+				colourGrid = getLocalColoursAsList(inputMask, x, y);
+				if (colourGrid.contains(black.getRGB())) {
+					// if it bordering, add to mask
+					finalMask.setRGB(x, y, black.getRGB());
+				} else {
+					// else ignore it
+					finalMask.setRGB(x, y, alpha.getRGB());
+				}
+
+			}
+		}
 		return finalMask;
 	}
 

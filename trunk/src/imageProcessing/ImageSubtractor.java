@@ -67,7 +67,7 @@ public class ImageSubtractor {
 	public BufferedImage subtractBackground(BufferedImage inputImage) {
 		// SET THIS TO TRUE FOR VIDEO SET 3
 		boolean correction = true;
-		
+
 		// Get the mask from the blurred image
 		BufferedImage mask = imageMasker.createMask(imageBlur.averageBlur(inputImage, blurRadius), backgroundImage, prevMetrics, threshold);
 		// Get the bounding box from the mask
@@ -76,6 +76,7 @@ public class ImageSubtractor {
 		mask = imageMasker.expandContract(mask, imageMetrics, maskRadius);
 		mask = imageMasker.contractExpand(mask, imageMetrics, maskRadius);
 		// Get metrics
+		imageMetrics = boundingBoxer.getBoundingBox(mask, prevMetrics);
 		imageMetrics = metricsCentroid.findXMetrics(mask, imageMetrics, prevMetrics);
 
 		// Correction for video set 3
@@ -86,6 +87,13 @@ public class ImageSubtractor {
 			imageMetrics = boundingBoxer.getBoundingBox(mask, prevMetrics);
 			// Get other metrics
 			imageMetrics = metricsCentroid.findXMetrics(mask, imageMetrics, prevMetrics);
+			// Expand around face
+			for (int i = 0; i < 8; i++) {
+				mask = imageMasker.expandLocalArea(mask, imageMetrics,
+						new Metrics(imageMetrics.getAbsStartX(), imageMetrics.getAbsStartY() + 10, imageMetrics.getAbsStartX() + imageMetrics.getRelCentroidX(),
+								imageMetrics.getAbsStartY() + 80));
+			}
+			mask = imageMasker.expandContract(mask, imageMetrics, maskRadius);
 		}
 
 		// Mask the image
@@ -100,9 +108,11 @@ public class ImageSubtractor {
 		// Check size
 		checkLargestBBox(imageMetrics);
 		// Return the image with debug information
-		return metricsCentroid.drawMetrics(boundingBoxer.drawBoundingBox(maskedImage, imageMetrics), imageMetrics);
+		// return
+		// metricsCentroid.drawMetrics(boundingBoxer.drawBoundingBox(maskedImage,
+		// imageMetrics), imageMetrics);
 		// Return the image
-		// return maskedImage;
+		return maskedImage;
 	}
 
 	public Metrics getLargestBoundingBox() {
