@@ -111,13 +111,13 @@ public class ImageMasker {
 					foundSomething = true;
 				}
 				/*
-				 * Green for trees. I hate trees. N.B. This is a rather specific
-				 * check for the 3rd set of videos captured. Comment out for
-				 * other videos.
+				 * TODO: YOU MAY WANT TO COMMENT THIS OUT! Green for trees. I
+				 * hate trees. N.B. This is a rather specific check for the 3rd
+				 * set of videos captured. Comment out for other videos.
 				 */
-//				if ((imgColour.getGreen() > imgColour.getBlue()) && (imgColour.getGreen() > imgColour.getRed())) {
-//					mask.setRGB(x, y, alpha.getRGB());
-//				}
+				if ((imgColour.getGreen() > imgColour.getBlue()) && (imgColour.getGreen() > imgColour.getRed())) {
+					mask.setRGB(x, y, alpha.getRGB());
+				}
 			}
 		}
 
@@ -162,6 +162,34 @@ public class ImageMasker {
 			inputMask = contractOne(inputMask, metrics);
 		}
 		return inputMask;
+	}
+
+	public BufferedImage blockAlpha(BufferedImage inputMask, Metrics metrics) {
+		int imgWidth = inputMask.getWidth();
+		int imgHeight = inputMask.getHeight();
+		BufferedImage alphaMask = new BufferedImage(inputMask.getWidth(), inputMask.getHeight(), BufferedImage.TYPE_INT_ARGB);
+		for (int x = 0; x < imgWidth; x++) {
+			for (int y = 0; y < imgHeight; y++) {
+				alphaMask.setRGB(x, y, alpha.getRGB());
+			}
+		}
+
+		int xStart = metrics.getAbsStartX() + metrics.getRelCentroidX() - 250;
+		int xEnd = metrics.getAbsStartX() + metrics.getRelCentroidX() + 250;
+		xEnd = (xEnd > imgWidth) ? imgWidth : xEnd;
+
+		// TODO: Fix the getRGB() long version
+		for (int x = xStart; x < xEnd; x++) {
+			for (int y = 0; y < imgHeight; y++) {
+				alphaMask.setRGB(x, y, inputMask.getRGB(x, y));
+			}
+		}
+
+		// alphaMask.setRGB(xStart, 0, xEnd - xStart, imgHeight,
+		// alphaMask.getRGB(xStart, 0, xEnd - xStart, imgHeight, null, 0, xEnd -
+		// xStart), 0, xEnd - xStart);
+
+		return alphaMask;
 	}
 
 	/**

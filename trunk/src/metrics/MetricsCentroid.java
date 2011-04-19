@@ -31,12 +31,13 @@ public class MetricsCentroid {
 	 *            The image to find metrics for.
 	 * @param imageMetrics
 	 *            The given metrics. Should only contain the bounding-box
-	 *            coordinates, and velocity flag.
+	 *            coordinates, and velocity flag. This is where the additional
+	 *            metrics will be written to.
 	 * @param prevMetrics
 	 *            The metrics from the previous image. Should be complete. If
 	 *            null, x-velocity will be 0.
 	 */
-	public void findCentroidMetrics(BufferedImage image, Metrics imageMetrics, Metrics prevMetrics) {
+	public Metrics findXMetrics(BufferedImage image, Metrics imageMetrics, Metrics prevMetrics) {
 		/* X-Centroid */
 		int boxWidth = imageMetrics.getAbsEndX() - imageMetrics.getAbsStartX();
 
@@ -83,6 +84,8 @@ public class MetricsCentroid {
 		}
 		// Store it
 		imageMetrics.setRelVelocityX(xVelocity);
+
+		return imageMetrics;
 	}
 
 	/**
