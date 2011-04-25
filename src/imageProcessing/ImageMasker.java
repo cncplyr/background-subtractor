@@ -51,6 +51,9 @@ public class ImageMasker {
 	/**
 	 * Takes an input image and background image, and creates a subtracted mask.
 	 * 
+	 * TODO: N.B. this method contains variables for the current video set (4).
+	 * Change the value of startX and startY to 0 for other videos.
+	 * 
 	 * @param blurredInputImage
 	 * @param blurredBackgroundImage
 	 * @param metrics
@@ -70,8 +73,8 @@ public class ImageMasker {
 
 		if (metrics == null) {
 			// Just search the whole image
-			startX = 0;
-			startY = 0;
+			startX = 60;
+			startY = 60;
 			endX = imgWidth;
 			endY = imgHeight;
 		} else {
@@ -85,8 +88,8 @@ public class ImageMasker {
 			endY = metrics.getAbsEndY() + bbWidth;
 
 			// Check search is in available range
-			startX = (startX < 0) ? 0 : startX;
-			startY = (startY < 0) ? 0 : startY;
+			startX = (startX < 60) ? 60 : startX;
+			startY = (startY < 60) ? 60 : startY;
 			endX = (endX > imgWidth) ? imgWidth : endX;
 			endY = (endY > imgHeight) ? imgHeight : endY;
 		}
@@ -110,14 +113,7 @@ public class ImageMasker {
 					mask.setRGB(x, y, black.getRGB());
 					foundSomething = true;
 				}
-				/*
-				 * TODO: YOU MAY WANT TO COMMENT THIS OUT! Green for trees. I
-				 * hate trees. N.B. This is a rather specific check for the 3rd
-				 * set of videos captured. Comment out for other videos.
-				 */
-				if ((imgColour.getGreen() > imgColour.getBlue()) && (imgColour.getGreen() > imgColour.getRed())) {
-					mask.setRGB(x, y, alpha.getRGB());
-				}
+
 			}
 		}
 
