@@ -73,8 +73,8 @@ public class ImageMasker {
 
 		if (metrics == null) {
 			// Just search the whole image
-			startX = 60;
-			startY = 60;
+			startX = 0;
+			startY = 0;
 			endX = imgWidth;
 			endY = imgHeight;
 		} else {
@@ -88,8 +88,8 @@ public class ImageMasker {
 			endY = metrics.getAbsEndY() + bbWidth;
 
 			// Check search is in available range
-			startX = (startX < 60) ? 60 : startX;
-			startY = (startY < 60) ? 60 : startY;
+			startX = (startX < 0) ? 0 : startX;
+			startY = (startY < 0) ? 0 : startY;
 			endX = (endX > imgWidth) ? imgWidth : endX;
 			endY = (endY > imgHeight) ? imgHeight : endY;
 		}
