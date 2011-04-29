@@ -16,6 +16,7 @@ import metrics.Metrics;
 
 import fileHandling.CSVHandler;
 import fileHandling.FileHandler;
+import fileHandling.FileName;
 
 /**
  * 
@@ -25,17 +26,20 @@ import fileHandling.FileHandler;
  */
 public class BackgroundSubtractor {
 	private FileHandler fileHandler;
+	private CSVHandler csvHandler;
+	private FileName fNamer;
+	
 	private ImageSubtractor imageSubtractor;
 	private ImageCentraliser imageCentraliser;
-	private CSVHandler csvHandler;
 	private int blurRadius;
 
 	/**
 	 * Constructor
 	 */
-	public BackgroundSubtractor() {
-		fileHandler = new FileHandler();
-		csvHandler = new CSVHandler();
+	public BackgroundSubtractor(FileHandler fh, CSVHandler csvh, FileName fNamer) {
+		this.fileHandler = fh;
+		this.csvHandler = csvh;
+		this.fNamer = fNamer;
 		imageSubtractor = new ImageSubtractor(1280, 720, 25);
 		imageSubtractor.setCSVHandler(csvHandler);
 		imageCentraliser = new ImageCentraliser();
@@ -65,7 +69,7 @@ public class BackgroundSubtractor {
 			try {
 				BufferedImage currentImage = fileHandler.loadImage(name);
 				BufferedImage subtractedImage = imageSubtractor.subtractBackground(currentImage);
-				fileHandler.saveImage(subtractedImage, formatFileName("frame", counter++));
+				fileHandler.saveImage(subtractedImage, FileName.formatFileName("frame", counter++, ""));
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

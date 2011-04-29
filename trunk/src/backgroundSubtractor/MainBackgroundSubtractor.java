@@ -2,6 +2,10 @@ package backgroundSubtractor;
 
 import java.awt.image.BufferedImage;
 
+import fileHandling.CSVHandler;
+import fileHandling.FileHandler;
+import fileHandling.FileName;
+
 /**
  * This is the main entry point to the program.
  * 
@@ -10,14 +14,23 @@ import java.awt.image.BufferedImage;
  * 
  */
 public class MainBackgroundSubtractor {
+	private static FileHandler fh;
+	private static CSVHandler csvh;
+	private static FileName fn;
+	
 	private static BackgroundCreator backgroundCreator;
 	private static BackgroundSubtractor backgroundSubtractor;
 	private static P2ImageCreator p2gen;
+	
+
 
 	public static void main(String[] args) {
-		backgroundCreator = new BackgroundCreator();
-		backgroundSubtractor = new BackgroundSubtractor();
-		p2gen = new P2ImageCreator();
+		fh = new FileHandler();
+		csvh = new CSVHandler();
+		
+		backgroundCreator = new BackgroundCreator(fh);
+		backgroundSubtractor = new BackgroundSubtractor(fh, csvh, fn);
+		p2gen = new P2ImageCreator(fh);
 
 		createBackground();
 		subtractBackground();

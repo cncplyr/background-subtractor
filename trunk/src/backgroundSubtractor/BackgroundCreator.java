@@ -16,6 +16,7 @@ import fileHandling.FileHandler;
  */
 public class BackgroundCreator {
 	private static FileHandler fileHandler;
+	
 	private static ImageCombiner imageCombiner;
 
 	private static String fileName = "image";
@@ -23,8 +24,8 @@ public class BackgroundCreator {
 	/**
 	 * Constructor
 	 */
-	public BackgroundCreator() {
-		fileHandler = new FileHandler();
+	public BackgroundCreator(FileHandler fh) {
+		this.fileHandler = fh;
 		imageCombiner = new ImageCombiner();
 	}
 
