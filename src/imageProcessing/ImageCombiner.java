@@ -12,7 +12,8 @@ import maths.AverageFinder;
 /**
  * Functions for combining images.
  * 
- * @author cncplyr
+ * @author Richard Jenkin
+ * @version 1.0
  * 
  */
 public class ImageCombiner {

@@ -4,6 +4,12 @@ import java.awt.image.BufferedImage;
 
 import metrics.Metrics;
 
+/**
+ * 
+ * @author Richard Jenkin
+ * @version 1.0
+ * 
+ */
 public class ImageCentraliser {
 	private Metrics cropSize;
 

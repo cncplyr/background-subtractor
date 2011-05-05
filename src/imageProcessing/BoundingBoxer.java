@@ -7,8 +7,8 @@ import metrics.Metrics;
 
 /**
  * 
- * @author cncplyr
- * @version 0.2
+ * @author Richard Jenkin
+ * @version 1.0
  * 
  */
 public class BoundingBoxer {
@@ -87,9 +87,7 @@ public class BoundingBoxer {
 	 * Creates a red border at the coordinates given.
 	 * 
 	 * N.B. I was going to program this using setRGB with an entire line, but
-	 * this method proved to be just as fast, and less complicated so I stuck
-	 * with this.
-	 * 
+	 * this method proved to be just as fast, if not faster.
 	 * 
 	 * @param image
 	 * @param metrics

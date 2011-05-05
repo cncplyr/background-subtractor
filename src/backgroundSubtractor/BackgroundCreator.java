@@ -11,12 +11,13 @@ import fileHandling.FileHandler;
 /**
  * Creates a background image by taking averages of all images.
  * 
- * @author cncplyr
- * @version 0.3
+ * @author Richard Jenkin
+ * @version 1.0
+ * 
  */
 public class BackgroundCreator {
 	private static FileHandler fileHandler;
-	
+
 	private static ImageCombiner imageCombiner;
 
 	private static String fileName = "image";

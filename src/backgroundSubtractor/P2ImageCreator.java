@@ -8,6 +8,12 @@ import java.util.List;
 
 import fileHandling.FileHandler;
 
+/**
+ * 
+ * @author Richard Jenkin
+ * @version 1.0
+ * 
+ */
 public class P2ImageCreator {
 	private FileHandler fh;
 	private ImageMirror im;

@@ -11,6 +11,7 @@ import maths.AverageFinder;
  * This class calculates various useful metrics about an image.
  * 
  * @author Richard Jenkin
+ * @version 1.0
  * 
  */
 public class MetricsCentroid {

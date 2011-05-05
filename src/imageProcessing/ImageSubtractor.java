@@ -10,8 +10,8 @@ import fileHandling.CSVHandler;
 
 /**
  * 
- * @author cncplyr
- * @version 0.3
+ * @author Richard Jenkin
+ * @version 1.0
  * 
  */
 public class ImageSubtractor {
@@ -88,9 +88,9 @@ public class ImageSubtractor {
 		// Check size
 		checkLargestBBox(imageMetrics);
 		// Return the image with debug information
-//		 return
-//		 metricsCentroid.drawMetrics(boundingBoxer.drawBoundingBox(maskedImage,
-//		 imageMetrics), imageMetrics);
+		// return
+		// metricsCentroid.drawMetrics(boundingBoxer.drawBoundingBox(maskedImage,
+		// imageMetrics), imageMetrics);
 		// Return the image
 		return maskedImage;
 	}
