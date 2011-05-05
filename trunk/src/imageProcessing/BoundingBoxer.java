@@ -29,7 +29,7 @@ public class BoundingBoxer {
 		// Prepare previous metrics for enhanced search
 		int halfWidth, halfHeight;
 		int startX = 0;
-		int startY = 0;
+		int startY = 60;
 		int endX = width - 1;
 		int endY = height - 1;
 		if (prevMetrics != null) {
@@ -42,11 +42,11 @@ public class BoundingBoxer {
 			halfHeight = Math.abs(prevMetrics.getAbsEndY() - prevMetrics.getAbsStartY()) / 2;
 			startY = prevMetrics.getAbsStartY() - halfHeight;
 			endY = prevMetrics.getAbsEndY() + halfHeight;
-			startY = (startY < 0) ? 0 : startY;
+			startY = (startY < 60) ? 60 : startY;
 			endY = (endY >= height) ? height - 1 : endY;
 		}
 
-		// START: Slightly Smarter Brute-Force Search (SSBFS)
+		// START: Single-Pass Pixel Search
 		int[] scanline = new int[width];
 		boolean currentScanlineFlag = false;
 
@@ -54,45 +54,31 @@ public class BoundingBoxer {
 		for (int y = startY; y < height; y++) {
 			scanline = inputImage.getRGB(0, y, width, 1, null, 0, width);
 			for (int x = startX; x < width; x++) {
-				if (!currentScanlineFlag) {
-					// First non-alpha pixel in the line
-					if ((scanline[x] & 0x0000FF) != 0) {
-						if (x < metrics.getAbsStartX()) {
-							// store the new start-x value
-							metrics.setAbsStartX(x);
-							currentScanlineFlag = true;
-						}
+				// First non-alpha pixel in the line
+				if ((scanline[x] & 0x0000FF) != 0) {
+					currentScanlineFlag = true;
+					if (x < metrics.getAbsStartX()) {
+						// store the new start-x value
+						metrics.setAbsStartX(x);
+					} else if (x > metrics.getAbsEndX()) {
+						// store the new end-x value
+						metrics.setAbsEndX(x);
 					}
-					if (currentScanlineFlag && y < metrics.getAbsStartY()) {
-						// store the start-y value
-						metrics.setAbsStartY(y);
-					}
+				}
+			}
+			// Non-alpha pixels exist
+			if (currentScanlineFlag) {
+				if (y < metrics.getAbsStartY()) {
+					// store the start-y value
+					metrics.setAbsStartY(y);
+				} else if (y > metrics.getAbsEndY()) {
+					// store the end-y value
+					metrics.setAbsEndY(y);
 				}
 			}
 			currentScanlineFlag = false;
 		}
-		// Find teh last (x, y) pair
-		for (int y = endY; y > metrics.getAbsStartY(); y--) {
-			scanline = inputImage.getRGB(0, y, width, 1, null, 0, width);
-			for (int x = width - 1; x > metrics.getAbsStartX(); x--) {
-				if (!currentScanlineFlag) {
-					// First non-alpha pixel in the line
-					if ((scanline[x] & 0x0000FF) != 0) {
-						if (x > metrics.getAbsEndX()) {
-							// store the new start-x value
-							metrics.setAbsEndX(x);
-							currentScanlineFlag = true;
-						}
-					}
-					if (currentScanlineFlag && y > metrics.getAbsEndY()) {
-						// store the start-y value
-						metrics.setAbsEndY(y);
-					}
-				}
-			}
-			currentScanlineFlag = false;
-		}
-		// END: Slightly Smarter Brute-Force Search (SSBFS)
+		// END: Single-Pass Pixel Search
 
 		return metrics;
 	}
