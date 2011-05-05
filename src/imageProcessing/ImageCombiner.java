@@ -13,7 +13,6 @@ import maths.AverageFinder;
  * Functions for combining images.
  * 
  * @author cncplyr
- * @version 0.2
  * 
  */
 public class ImageCombiner {
@@ -67,13 +66,12 @@ public class ImageCombiner {
 		List<Integer> currentPixel = new ArrayList<Integer>();
 
 		if (noOfImages % 2 == 0) {
-			// If wrong number of images, remove the last one.
+			// If wrong number of images (even), remove the last one.
 			// There are plenty more fish in the sea!
 			images.remove(noOfImages - 1);
 		}
 
-		// N.B. this is actually doing vertical lines, not horizontal lines
-		// (I think)
+		// N.B. this is actually doing vertical lines, not horizontal lines.
 		for (int x = 0; x < width; x++) {
 			if ((x) % 128 == 0) {
 				System.out.println((x / 128) + "0%");
