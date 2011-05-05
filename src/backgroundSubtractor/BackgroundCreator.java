@@ -16,7 +16,7 @@ import fileHandling.FileHandler;
  * 
  */
 public class BackgroundCreator {
-	private static FileHandler fileHandler;
+	private FileHandler fileHandler;
 
 	private static ImageCombiner imageCombiner;
 
