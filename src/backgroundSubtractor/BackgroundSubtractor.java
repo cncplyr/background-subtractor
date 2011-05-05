@@ -105,7 +105,7 @@ public class BackgroundSubtractor {
 			try {
 				BufferedImage currentImage = fileHandler.loadImage(name);
 				BufferedImage centralisedImage = imageCentraliser.centralCrop(currentImage, new Metrics(nextLine));
-				fileHandler.saveImage(centralisedImage, FileName.formatFileName("frame", counter++, "png"));
+				fileHandler.saveImage(centralisedImage, FileName.formatFileName("frame", counter++, ""));
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
