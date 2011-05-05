@@ -1,10 +1,15 @@
 package imageProcessing;
 
 import java.awt.image.BufferedImage;
-import java.util.List;
 
 import metrics.Metrics;
 
+/**
+ * 
+ * @author Richard Jenkin
+ * @version 1.0
+ *
+ */
 public class ImageCropper {
 
 	public ImageCropper() {

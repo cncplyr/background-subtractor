@@ -4,19 +4,17 @@ import java.awt.image.BufferedImage;
 
 import fileHandling.CSVHandler;
 import fileHandling.FileHandler;
-import fileHandling.FileName;
 
 /**
  * This is the main entry point to the program.
  * 
- * @author cncplyr
- * @version 0.3
+ * @author Richard Jenkin
+ * @version 1.0
  * 
  */
 public class MainBackgroundSubtractor {
 	private static FileHandler fh;
 	private static CSVHandler csvh;
-	private static FileName fn;
 	
 	private static BackgroundCreator backgroundCreator;
 	private static BackgroundSubtractor backgroundSubtractor;
@@ -29,7 +27,7 @@ public class MainBackgroundSubtractor {
 		csvh = new CSVHandler();
 		
 		backgroundCreator = new BackgroundCreator(fh);
-		backgroundSubtractor = new BackgroundSubtractor(fh, csvh, fn);
+		backgroundSubtractor = new BackgroundSubtractor(fh, csvh);
 		p2gen = new P2ImageCreator(fh);
 
 		createBackground();

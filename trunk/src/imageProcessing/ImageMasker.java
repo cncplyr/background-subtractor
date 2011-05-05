@@ -3,7 +3,6 @@ package imageProcessing;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import metrics.Metrics;
@@ -12,8 +11,8 @@ import metrics.Metrics;
  * This class implements the Circular _____ thing to remove odd outliers,
  * creating a smoother mask. Works only with masks.
  * 
- * @author cncplyr
- * @version 0.3
+ * @author Richard Jenkin
+ * @version 1.0
  * 
  */
 public class ImageMasker {
